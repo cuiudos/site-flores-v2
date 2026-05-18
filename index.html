@@ -360,7 +360,7 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
       </div>
     </div>
     <div class="hero-img-col">
-      <img src="https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=900&auto=format&fit=crop&q=80" alt="Flores frescas">
+      <img src="flores-frescas.jpg" alt="Flores frescas">
     </div>
     <div class="hero-decor">
       <div class="hero-stat"><span class="n">500+</span><span class="l">Pedidos</span></div>
@@ -385,22 +385,22 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
     </div>
     <div class="cat-grid">
       <div class="cat-card" onclick="filterGo('Rosas')">
-        <img src="https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=600&auto=format&fit=crop&q=80" alt="Rosas">
+        <img src="rosas.jpg" alt="Rosas">
         <div class="cat-overlay"></div>
         <div class="cat-label"><h3>Rosas</h3><small>A clássica declaração</small></div>
       </div>
       <div class="cat-card" onclick="filterGo('Buquês')">
-        <img src="https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=600&auto=format&fit=crop&q=80" alt="Buquês">
+        <img src="buque-premiun.jpg" alt="Buquês">
         <div class="cat-overlay"></div>
         <div class="cat-label"><h3>Buquês</h3><small>Para toda ocasião</small></div>
       </div>
       <div class="cat-card" onclick="filterGo('Arranjos')">
-        <img src="https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600&auto=format&fit=crop&q=80" alt="Arranjos">
+        <img src="arranjos.jpg" alt="Arranjos">
         <div class="cat-overlay"></div>
         <div class="cat-label"><h3>Arranjos</h3><small>Decoração & presentes</small></div>
       </div>
       <div class="cat-card" onclick="filterGo('Plantas')">
-        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&auto=format&fit=crop&q=80" alt="Plantas">
+        <img src="plantas.jpg" alt="Plantas">
         <div class="cat-overlay"></div>
         <div class="cat-label"><h3>Plantas</h3><small>Presente que dura</small></div>
       </div>
@@ -533,9 +533,9 @@ const products = [
     id:1, name:"Buquê de Rosas Vermelhas", cat:"Rosas", badge:"Mais pedido",
     desc:"Clássico e apaixonante, este buquê de rosas vermelhas é a declaração perfeita. Ideal para Dia dos Namorados, aniversários ou para surpreender a pessoa amada com muito carinho.",
     imgs:[
-      "https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=700&auto=format&fit=crop&q=80"
+      "rosas.jpg",
+      "flores-do-campo.jpg",
+      "mix-gerberas.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"6 rosas · Embrulho simples", price:89},
@@ -547,8 +547,8 @@ const products = [
     id:2, name:"Mix de Gérberas Coloridas", cat:"Buquês", badge:"Novidade",
     desc:"Um buquê vibrante com gérberas em diversas cores. Alegra qualquer ambiente e é perfeito para aniversários, chegada de bebê ou comemorações especiais.",
     imgs:[
-      "https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=700&auto=format&fit=crop&q=80"
+      "mix-gerberas.jpg",
+      "flores-do-campo.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"8 gérberas", price:79},
@@ -560,8 +560,8 @@ const products = [
     id:3, name:"Arranjo de Lírios Brancos", cat:"Arranjos",
     desc:"Sofisticado e elegante, o arranjo de lírios brancos transmite paz e pureza. Perfeito para homenagens, ambientes refinados ou como presente especial e marcante.",
     imgs:[
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=700&auto=format&fit=crop&q=80"
+      "lirios.jpg",
+      "flores-do-campo.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"5 hastes · Vaso P", price:99},
@@ -573,8 +573,8 @@ const products = [
     id:4, name:"Buquê Romântico Premium", cat:"Buquês", badge:"Premium",
     desc:"Composição exclusiva com rosas, ranúnculos e flores do campo. Um presente que encanta e emociona, pensado para os momentos mais especiais da sua vida.",
     imgs:[
-      "https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=700&auto=format&fit=crop&q=80"
+      "buque-premiun.jpg",
+      "flores-do-campo.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"Compacto · 10 flores", price:119},
@@ -586,8 +586,8 @@ const products = [
     id:5, name:"Tulipas Holandesas", cat:"Especiais",
     desc:"Tulipas importadas da Holanda, disponíveis em cores vibrantes como rosa, roxo, amarelo e branco. Elegância e delicadeza em um presente verdadeiramente memorável.",
     imgs:[
-      "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&auto=format&fit=crop&q=80"
+      "tulipas.jpg",
+      "flores-do-campo.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"8 tulipas", price:89},
@@ -599,8 +599,8 @@ const products = [
     id:6, name:"Arranjo Tropical Colorido", cat:"Arranjos",
     desc:"Flores tropicais exóticas como helicônias, proteácias e folhagens verdes. Traz vida, cor e personalidade a qualquer espaço ou evento.",
     imgs:[
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=700&auto=format&fit=crop&q=80"
+      "flores-do-campo.jpg",
+      "mix-gerberas.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"Vaso pequeno", price:79},
@@ -612,8 +612,8 @@ const products = [
     id:7, name:"Girassóis Alegres", cat:"Buquês",
     desc:"Girassóis radiantes que iluminam qualquer ambiente. Transmitem alegria, amizade e gratidão — o presente perfeito para animar alguém especial no seu dia.",
     imgs:[
-      "https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=700&auto=format&fit=crop&q=80"
+      "flores-do-campo.jpg",
+      "mix-gerberas.jpg"
     ],
     sizes:[
       {k:"P", label:"Pequeno", desc:"5 girassóis", price:69},
@@ -625,8 +625,8 @@ const products = [
     id:8, name:"Orquídea Phalaenopsis", cat:"Plantas", badge:"Exclusivo",
     desc:"Orquídea de ciclo longo com floração durável por meses. Sofisticada e delicada, é o presente ideal para decorar ambientes ou presentear alguém muito especial.",
     imgs:[
-      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=700&auto=format&fit=crop&q=80"
+      "flores-do-campo.jpg",
+      "mix-gerberas.jpg"
     ],
     sizes:[
       {k:"P", label:"Simples", desc:"1 haste · Vaso cerâmica", price:89},
