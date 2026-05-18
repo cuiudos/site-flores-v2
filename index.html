@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdô Flores | Flores & Arranjos Especiais</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FDF6EE;
+  --cream2:#F8F0E6;
+  --green-dark:#1E3A2F;
+  --green-mid:#2D5A3D;
+  --green-light:#8BA888;
+  --green-pale:#E8F0E6;
+  --terra:#C4714A;
+  --terra-light:#E8956D;
+  --brown:#2C1810;
+  --text:#3D2B1F;
+  --text-light:#7A6355;
+  --border:#E8DDD4;
+  --card-bg:#FEFAF6;
+  --white:#FFFFFF;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:var(--green-dark);
+  height:64px;padding:0 3rem;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 20px rgba(0,0,0,0.25);
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.65rem;font-weight:600;color:var(--cream);
+  cursor:pointer;text-decoration:none;letter-spacing:-0.01em;
+}
+.nav-logo em{font-style:italic;color:var(--terra-light)}
+.nav-links{display:flex;gap:2rem;align-items:center}
+.nav-links a{
+  color:var(--green-light);text-decoration:none;
+  font-size:0.8rem;font-weight:500;letter-spacing:0.07em;
+  text-transform:uppercase;cursor:pointer;transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--cream)}
+.nav-cta{
+  background:var(--terra)!important;color:white!important;
+  padding:0.45rem 1.2rem;border-radius:2rem;
+  transition:background 0.2s!important;
+}
+.nav-cta:hover{background:var(--terra-light)!important}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.nav-hamburger span{display:block;width:24px;height:2px;background:var(--cream);border-radius:2px;transition:all 0.3s}
+
+/* ── PAGES ── */
+.page{display:none;padding-top:64px}
+.page.active{display:block}
+
+/* ── HOME HERO ── */
+.hero{
+  min-height:calc(100vh - 64px);
+  background:var(--green-dark);
+  display:grid;grid-template-columns:55% 45%;
+  position:relative;overflow:hidden;
+}
+.hero-content{
+  padding:5rem 4rem 5rem 5rem;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;z-index:2;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(196,113,74,0.15);color:var(--terra-light);
+  border:1px solid rgba(196,113,74,0.35);
+  padding:0.35rem 1rem;border-radius:2rem;
+  font-size:0.7rem;font-weight:600;letter-spacing:0.12em;
+  text-transform:uppercase;margin-bottom:1.75rem;width:fit-content;
+}
+.hero h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.6rem,4.5vw,4.75rem);
+  font-weight:300;line-height:1.08;
+  color:var(--cream);margin-bottom:1.5rem;
+}
+.hero h1 em{font-style:italic;color:var(--terra-light)}
+.hero-sub{color:var(--green-light);font-size:1rem;line-height:1.75;max-width:420px;margin-bottom:2.5rem}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{
+  background:var(--terra);color:white;
+  padding:0.9rem 2rem;border-radius:2rem;
+  font-size:0.9rem;font-weight:500;cursor:pointer;
+  border:none;transition:all 0.22s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:0.4rem;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-primary:hover{background:var(--terra-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(196,113,74,0.4)}
+.btn-outline{
+  background:transparent;color:var(--cream);
+  padding:0.9rem 2rem;border-radius:2rem;
+  font-size:0.9rem;font-weight:500;cursor:pointer;
+  border:1.5px solid rgba(255,255,255,0.25);transition:all 0.22s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-outline:hover{border-color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.06)}
+.hero-img-col{position:relative;overflow:hidden}
+.hero-img-col img{width:100%;height:100%;object-fit:cover;opacity:0.6;transition:opacity 0.4s}
+.hero-img-col::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,var(--green-dark) 0%,transparent 45%);
+}
+.hero-decor{
+  position:absolute;bottom:2.5rem;left:5rem;z-index:3;
+  display:flex;gap:2.5rem;
+}
+.hero-stat{color:var(--cream)}
+.hero-stat .n{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;display:block;line-height:1}
+.hero-stat .l{font-size:0.7rem;color:var(--green-light);letter-spacing:0.08em;text-transform:uppercase}
+
+/* ── STRIPS ── */
+.terra-strip{
+  background:var(--terra);padding:1.1rem 4rem;
+  display:flex;gap:3rem;justify-content:center;flex-wrap:wrap;
+}
+.strip-item{display:flex;align-items:center;gap:0.6rem;color:white}
+.strip-item .si{font-size:1.1rem}
+.strip-item span{font-size:0.82rem;font-weight:500}
+
+/* ── SECTION COMMONS ── */
+.section{padding:5rem 4rem}
+.section-header{text-align:center;margin-bottom:3rem}
+.s-tag{display:inline-block;color:var(--terra);font-size:0.7rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:0.6rem}
+.s-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.9rem,3.5vw,3rem);font-weight:400;color:var(--green-dark);line-height:1.15}
+.s-title em{font-style:italic;color:var(--terra)}
+.s-sub{color:var(--text-light);margin-top:0.6rem;font-size:0.95rem}
+
+/* ── CATEGORIES ── */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;max-width:1100px;margin:0 auto}
+.cat-card{
+  border-radius:1rem;overflow:hidden;cursor:pointer;
+  aspect-ratio:3/4;position:relative;
+  transition:transform 0.32s,box-shadow 0.32s;
+}
+.cat-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(30,58,47,0.22)}
+.cat-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s}
+.cat-card:hover img{transform:scale(1.06)}
+.cat-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(30,58,47,0.85) 0%,rgba(30,58,47,0.1) 55%);
+}
+.cat-label{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:1.5rem 1.25rem 1.25rem;
+}
+.cat-label h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:500;color:var(--cream)}
+.cat-label small{font-size:0.72rem;color:var(--green-light);display:block;margin-top:0.15rem}
+
+/* ── PRODUCT CARDS ── */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.75rem;max-width:1100px;margin:0 auto}
+.prod-card{
+  background:var(--card-bg);border-radius:1rem;overflow:hidden;
+  border:1px solid var(--border);cursor:pointer;
+  transition:transform 0.28s,box-shadow 0.28s;
+}
+.prod-card:hover{transform:translateY(-5px);box-shadow:0 14px 36px rgba(30,58,47,0.13)}
+.prod-img{position:relative;aspect-ratio:4/3;overflow:hidden}
+.prod-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.42s}
+.prod-card:hover .prod-img img{transform:scale(1.07)}
+.prod-badge{
+  position:absolute;top:0.75rem;left:0.75rem;
+  background:var(--terra);color:white;
+  font-size:0.63rem;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;padding:0.25rem 0.7rem;border-radius:2rem;
+}
+.prod-info{padding:1.25rem}
+.prod-cat{font-size:0.68rem;color:var(--terra);font-weight:700;text-transform:uppercase;letter-spacing:0.1em}
+.prod-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:500;color:var(--green-dark);margin:0.3rem 0 0.2rem;line-height:1.25}
+.prod-price{font-size:0.82rem;color:var(--text-light)}
+.prod-price strong{font-size:1.1rem;color:var(--green-dark);font-weight:600}
+.prod-btn{
+  display:block;width:100%;margin-top:1rem;
+  background:var(--green-dark);color:var(--cream);
+  border:none;padding:0.75rem;border-radius:0.6rem;
+  font-size:0.82rem;font-weight:500;cursor:pointer;
+  transition:background 0.2s;font-family:'DM Sans',sans-serif;
+}
+.prod-btn:hover{background:var(--green-mid)}
+
+/* ── BANNER CTA ── */
+.home-banner{
+  background:var(--green-dark);padding:5rem 4rem;
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:3rem;
+}
+.hb-text h2{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--cream);margin-bottom:0.75rem}
+.hb-text h2 em{font-style:italic;color:var(--terra-light)}
+.hb-text p{color:var(--green-light);font-size:0.95rem;max-width:480px}
+
+/* ── CATALOG PAGE ── */
+.cat-header{
+  background:var(--green-dark);padding:4rem 4rem 3rem;
+}
+.cat-header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.25rem);font-weight:300;color:var(--cream)}
+.cat-header h1 em{font-style:italic;color:var(--terra-light)}
+.cat-header p{color:var(--green-light);margin-top:0.5rem;font-size:0.9rem}
+.filters-bar{
+  background:white;border-bottom:1px solid var(--border);
+  padding:0.9rem 4rem;
+  display:flex;gap:0.65rem;align-items:center;
+  position:sticky;top:64px;z-index:100;
+  overflow-x:auto;
+}
+.filters-bar::-webkit-scrollbar{height:0}
+.f-label{font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;margin-right:0.25rem}
+.f-btn{
+  padding:0.38rem 1rem;border-radius:2rem;border:1.5px solid var(--border);
+  background:white;color:var(--text);font-size:0.82rem;cursor:pointer;
+  transition:all 0.18s;white-space:nowrap;font-family:'DM Sans',sans-serif;
+}
+.f-btn:hover{border-color:var(--green-light)}
+.f-btn.active{background:var(--green-dark);color:var(--cream);border-color:var(--green-dark)}
+.catalog-body{padding:3rem 4rem}
+.catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.75rem;max-width:1100px;margin:0 auto}
+
+/* ── PRODUCT DETAIL PAGE ── */
+.detail-wrap{padding:2rem 4rem 5rem;max-width:1140px;margin:0 auto}
+.breadcrumb{display:flex;gap:0.45rem;align-items:center;font-size:0.78rem;color:var(--text-light);margin-bottom:2rem}
+.breadcrumb a{color:var(--terra);cursor:pointer;text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.breadcrumb .sep{color:var(--border)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:4.5rem}
+
+/* Gallery */
+.gallery-main{border-radius:1rem;overflow:hidden;aspect-ratio:1;border:1px solid var(--border);background:var(--card-bg)}
+.gallery-main img{width:100%;height:100%;object-fit:cover;transition:opacity 0.3s}
+.thumbs{display:flex;gap:0.65rem;margin-top:0.65rem}
+.thumb{
+  width:72px;height:72px;border-radius:0.6rem;overflow:hidden;
+  border:2px solid transparent;cursor:pointer;transition:border-color 0.18s;flex-shrink:0;
+}
+.thumb.active{border-color:var(--terra)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+
+/* Detail info */
+.d-cat{font-size:0.68rem;color:var(--terra);font-weight:700;text-transform:uppercase;letter-spacing:0.12em}
+.d-name{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;color:var(--green-dark);margin:0.4rem 0;line-height:1.15}
+.d-desc{color:var(--text-light);line-height:1.75;font-size:0.92rem;margin:1rem 0 1.75rem}
+.opt-label{font-size:0.75rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:block}
+.size-opts{display:flex;gap:0.75rem;margin-bottom:1.75rem}
+.size-opt{
+  flex:1;border:2px solid var(--border);border-radius:0.9rem;
+  padding:0.9rem 0.75rem;text-align:center;cursor:pointer;
+  transition:all 0.2s;background:white;
+}
+.size-opt:hover{border-color:var(--green-light)}
+.size-opt.sel{border-color:var(--green-dark);background:var(--green-dark);color:var(--cream)}
+.size-opt .sn{font-weight:700;font-size:1.05rem;display:block}
+.size-opt .sd{font-size:0.68rem;opacity:0.6;display:block;margin-top:0.15rem;line-height:1.4}
+.size-opt .sp{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;display:block;margin-top:0.4rem}
+.qty-row{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem}
+.qty-ctrl{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:0.65rem;overflow:hidden}
+.qty-b{width:42px;height:42px;border:none;background:var(--cream2);cursor:pointer;font-size:1.2rem;transition:background 0.15s;font-family:'DM Sans',sans-serif}
+.qty-b:hover{background:var(--border)}
+.qty-n{width:52px;text-align:center;font-weight:600;font-size:1rem;border:none;outline:none;background:white;font-family:'DM Sans',sans-serif}
+.qty-total small{font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--text-light);display:block}
+.qty-total .tprice{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;color:var(--green-dark);line-height:1}
+.btn-wpp{
+  display:flex;align-items:center;justify-content:center;gap:0.7rem;
+  width:100%;padding:1rem 2rem;border-radius:0.85rem;
+  background:#25D366;color:white;border:none;
+  font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;
+  margin-bottom:0.75rem;font-family:'DM Sans',sans-serif;
+}
+.btn-wpp:hover{background:#1ebe59;transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,211,102,0.35)}
+.btn-wpp svg{width:22px;height:22px;flex-shrink:0}
+.btn-back{
+  display:block;width:100%;padding:0.875rem;
+  border:1.5px solid var(--border);border-radius:0.85rem;
+  background:transparent;color:var(--text);
+  font-size:0.9rem;cursor:pointer;transition:all 0.2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-back:hover{border-color:var(--green-dark);color:var(--green-dark)}
+.extras{margin-top:1.75rem;padding-top:1.75rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:1rem}
+.extra{display:flex;gap:0.85rem;align-items:flex-start}
+.extra-ic{width:38px;height:38px;background:var(--green-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.05rem}
+.extra-tx strong{display:block;font-size:0.85rem;color:var(--text);font-weight:600;margin-bottom:0.1rem}
+.extra-tx span{font-size:0.8rem;color:var(--text-light);line-height:1.5}
+
+/* ── FOOTER ── */
+footer{background:var(--green-dark);color:var(--green-light);padding:3rem 4rem;text-align:center}
+.ft-logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--cream);margin-bottom:0.4rem}
+.ft-logo em{font-style:italic;color:var(--terra-light)}
+footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-img-col{display:none}
+  .hero-content{padding:3.5rem 2rem}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .prod-grid,.catalog-grid{grid-template-columns:repeat(2,1fr)}
+  .home-banner{grid-template-columns:1fr;text-align:center}
+  .hb-text p{margin:0 auto}
+}
+@media(max-width:700px){
+  nav{padding:0 1.25rem}
+  .nav-links{display:none}
+  .nav-hamburger{display:flex}
+  .section{padding:3rem 1.25rem}
+  .cat-grid{grid-template-columns:repeat(2,1fr);gap:0.85rem}
+  .prod-grid,.catalog-grid{grid-template-columns:1fr 1fr;gap:0.85rem}
+  .terra-strip{padding:1rem 1.25rem;gap:1.25rem}
+  .cat-header,.catalog-body{padding:2.5rem 1.25rem}
+  .filters-bar{padding:0.75rem 1.25rem}
+  .detail-wrap{padding:1.25rem 1.25rem 3rem}
+  .detail-grid{grid-template-columns:1fr;gap:2rem}
+  .size-opts{gap:0.5rem}
+  .home-banner{padding:3rem 1.25rem}
+  footer{padding:2rem 1.25rem}
+}
+@media(max-width:420px){
+  .prod-grid,.catalog-grid{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.page.active .hero-content{animation:fadeUp 0.55s ease both}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" onclick="go('home')">Verdô <em>Flores</em></a>
+  <div class="nav-links">
+    <a onclick="go('home')">Início</a>
+    <a onclick="go('catalog')">Catálogo</a>
+    <a href="https://wa.me/5531999999999" target="_blank" class="nav-cta">📲 WhatsApp</a>
+  </div>
+  <div class="nav-hamburger" onclick="go('catalog')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="page-home" class="page active">
+
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-tag">🌿 Entrega em Betim e região</span>
+      <h1>Flores que<br><em>falam pelo</em><br>seu coração</h1>
+      <p class="hero-sub">Buquês e arranjos artesanais com escolha de tamanho e quantidade. Peça direto pelo WhatsApp — simples, bonito e rápido.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="go('catalog')">Ver catálogo →</button>
+        <button class="btn-outline" onclick="window.open('https://wa.me/5531999999999','_blank')">Falar no WhatsApp</button>
+      </div>
+    </div>
+    <div class="hero-img-col">
+      <img src="https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=900&auto=format&fit=crop&q=80" alt="Flores frescas">
+    </div>
+    <div class="hero-decor">
+      <div class="hero-stat"><span class="n">500+</span><span class="l">Pedidos</span></div>
+      <div class="hero-stat"><span class="n">4.9★</span><span class="l">Avaliação</span></div>
+      <div class="hero-stat"><span class="n">3h</span><span class="l">Entrega</span></div>
+    </div>
+  </section>
+
+  <div class="terra-strip">
+    <div class="strip-item"><span class="si">🚚</span><span>Entrega expressa em 3h</span></div>
+    <div class="strip-item"><span class="si">🌸</span><span>Flores frescas todo dia</span></div>
+    <div class="strip-item"><span class="si">💌</span><span>Cartão personalizado grátis</span></div>
+    <div class="strip-item"><span class="si">📲</span><span>Pedido fácil pelo WhatsApp</span></div>
+  </div>
+
+  <!-- Categories -->
+  <section class="section" style="background:white">
+    <div class="section-header">
+      <div class="s-tag">Explore por tipo</div>
+      <h2 class="s-title">Nossas <em>categorias</em></h2>
+      <p class="s-sub">De rosas clássicas a arranjos tropicais — tem a flor certa para cada momento</p>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="filterGo('Rosas')">
+        <img src="https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=600&auto=format&fit=crop&q=80" alt="Rosas">
+        <div class="cat-overlay"></div>
+        <div class="cat-label"><h3>Rosas</h3><small>A clássica declaração</small></div>
+      </div>
+      <div class="cat-card" onclick="filterGo('Buquês')">
+        <img src="https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=600&auto=format&fit=crop&q=80" alt="Buquês">
+        <div class="cat-overlay"></div>
+        <div class="cat-label"><h3>Buquês</h3><small>Para toda ocasião</small></div>
+      </div>
+      <div class="cat-card" onclick="filterGo('Arranjos')">
+        <img src="https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600&auto=format&fit=crop&q=80" alt="Arranjos">
+        <div class="cat-overlay"></div>
+        <div class="cat-label"><h3>Arranjos</h3><small>Decoração & presentes</small></div>
+      </div>
+      <div class="cat-card" onclick="filterGo('Plantas')">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&auto=format&fit=crop&q=80" alt="Plantas">
+        <div class="cat-overlay"></div>
+        <div class="cat-label"><h3>Plantas</h3><small>Presente que dura</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured -->
+  <section class="section">
+    <div class="section-header">
+      <div class="s-tag">Mais pedidos</div>
+      <h2 class="s-title">Flores em <em>destaque</em></h2>
+      <p class="s-sub">Os arranjos favoritos dos nossos clientes</p>
+    </div>
+    <div class="prod-grid" id="home-prod"></div>
+    <div style="text-align:center;margin-top:2.5rem">
+      <button class="btn-primary" onclick="go('catalog')">Ver catálogo completo →</button>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <div class="home-banner">
+    <div class="hb-text">
+      <h2>Peça agora pelo<br><em>WhatsApp</em></h2>
+      <p>Escolha o arranjo, o tamanho e a quantidade — enviamos a mensagem pronta para você. Entrega rápida, flores frescas e muito carinho em cada detalhe.</p>
+    </div>
+    <button class="btn-primary" style="font-size:1rem;padding:1rem 2.25rem" onclick="window.open('https://wa.me/5531999999999','_blank')">
+      <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Chamar no WhatsApp
+    </button>
+  </div>
+
+  <footer>
+    <div class="ft-logo">Verdô <em>Flores</em></div>
+    <p>Flores & Arranjos Especiais · Betim, MG</p>
+    <p>Pedidos pelo WhatsApp: (31) 9 9999-9999</p>
+  </footer>
+</div>
+
+<!-- ══════════ CATALOG ══════════ -->
+<div id="page-catalog" class="page">
+  <div class="cat-header">
+    <h1>Catálogo <em>completo</em></h1>
+    <p>Escolha o arranjo, selecione o tamanho e peça pelo WhatsApp com tudo pronto</p>
+  </div>
+  <div class="filters-bar">
+    <span class="f-label">Filtrar:</span>
+    <button class="f-btn active" onclick="setFilter('Todas',this)">Todas</button>
+    <button class="f-btn" onclick="setFilter('Rosas',this)">🌹 Rosas</button>
+    <button class="f-btn" onclick="setFilter('Buquês',this)">💐 Buquês</button>
+    <button class="f-btn" onclick="setFilter('Arranjos',this)">🏺 Arranjos</button>
+    <button class="f-btn" onclick="setFilter('Plantas',this)">🪴 Plantas</button>
+    <button class="f-btn" onclick="setFilter('Especiais',this)">✨ Especiais</button>
+  </div>
+  <div class="catalog-body">
+    <div class="catalog-grid" id="cat-prod"></div>
+  </div>
+  <footer>
+    <div class="ft-logo">Verdô <em>Flores</em></div>
+    <p>Flores & Arranjos Especiais · Betim, MG</p>
+    <p>Pedidos pelo WhatsApp: (31) 9 9999-9999</p>
+  </footer>
+</div>
+
+<!-- ══════════ PRODUCT DETAIL ══════════ -->
+<div id="page-product" class="page">
+  <div class="detail-wrap">
+    <div class="breadcrumb">
+      <a onclick="go('home')">Início</a><span class="sep">›</span>
+      <a onclick="go('catalog')">Catálogo</a><span class="sep">›</span>
+      <span id="bc-name">Produto</span>
+    </div>
+    <div class="detail-grid">
+      <!-- Gallery -->
+      <div>
+        <div class="gallery-main"><img id="gal-main" src="" alt=""></div>
+        <div class="thumbs" id="gal-thumbs"></div>
+      </div>
+      <!-- Info panel -->
+      <div>
+        <div class="d-cat" id="d-cat"></div>
+        <h1 class="d-name" id="d-name"></h1>
+        <p class="d-desc" id="d-desc"></p>
+
+        <span class="opt-label">Escolha o tamanho</span>
+        <div class="size-opts" id="d-sizes"></div>
+
+        <span class="opt-label">Quantidade</span>
+        <div class="qty-row">
+          <div class="qty-ctrl">
+            <button class="qty-b" onclick="chQty(-1)">−</button>
+            <input class="qty-n" id="qty-n" type="number" value="1" min="1" readonly>
+            <button class="qty-b" onclick="chQty(1)">+</button>
+          </div>
+          <div class="qty-total">
+            <small>Total estimado</small>
+            <div class="tprice" id="d-total">R$ 0,00</div>
+          </div>
+        </div>
+
+        <button class="btn-wpp" onclick="pedirWpp()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Pedir pelo WhatsApp
+        </button>
+        <button class="btn-back" onclick="go('catalog')">← Voltar ao catálogo</button>
+
+        <div class="extras">
+          <div class="extra">
+            <div class="extra-ic">🚚</div>
+            <div class="extra-tx"><strong>Entrega rápida</strong><span>Entrega expressa em até 3h para Betim e região</span></div>
+          </div>
+          <div class="extra">
+            <div class="extra-ic">🌸</div>
+            <div class="extra-tx"><strong>Flores frescas</strong><span>Selecionadas no dia do pedido, sempre fresquinhas</span></div>
+          </div>
+          <div class="extra">
+            <div class="extra-ic">💌</div>
+            <div class="extra-tx"><strong>Cartão personalizado grátis</strong><span>Inclua sua mensagem especial sem custo adicional</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ JS ══════════ -->
+<script>
+// ── PRODUCTS DATA ──
+const products = [
+  {
+    id:1, name:"Buquê de Rosas Vermelhas", cat:"Rosas", badge:"Mais pedido",
+    desc:"Clássico e apaixonante, este buquê de rosas vermelhas é a declaração perfeita. Ideal para Dia dos Namorados, aniversários ou para surpreender a pessoa amada com muito carinho.",
+    imgs:[
+      "https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"6 rosas · Embrulho simples", price:89},
+      {k:"M", label:"Médio", desc:"12 rosas · Papel kraft", price:139},
+      {k:"G", label:"Grande", desc:"24 rosas · Caixa premium", price:219}
+    ]
+  },
+  {
+    id:2, name:"Mix de Gérberas Coloridas", cat:"Buquês", badge:"Novidade",
+    desc:"Um buquê vibrante com gérberas em diversas cores. Alegra qualquer ambiente e é perfeito para aniversários, chegada de bebê ou comemorações especiais.",
+    imgs:[
+      "https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"8 gérberas", price:79},
+      {k:"M", label:"Médio", desc:"15 gérberas", price:119},
+      {k:"G", label:"Grande", desc:"25 gérberas", price:169}
+    ]
+  },
+  {
+    id:3, name:"Arranjo de Lírios Brancos", cat:"Arranjos",
+    desc:"Sofisticado e elegante, o arranjo de lírios brancos transmite paz e pureza. Perfeito para homenagens, ambientes refinados ou como presente especial e marcante.",
+    imgs:[
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"5 hastes · Vaso P", price:99},
+      {k:"M", label:"Médio", desc:"9 hastes · Vaso M", price:149},
+      {k:"G", label:"Grande", desc:"15 hastes · Vaso G", price:219}
+    ]
+  },
+  {
+    id:4, name:"Buquê Romântico Premium", cat:"Buquês", badge:"Premium",
+    desc:"Composição exclusiva com rosas, ranúnculos e flores do campo. Um presente que encanta e emociona, pensado para os momentos mais especiais da sua vida.",
+    imgs:[
+      "https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"Compacto · 10 flores", price:119},
+      {k:"M", label:"Médio", desc:"Médio · 18 flores", price:179},
+      {k:"G", label:"Grande", desc:"Luxuoso · 28 flores", price:249}
+    ]
+  },
+  {
+    id:5, name:"Tulipas Holandesas", cat:"Especiais",
+    desc:"Tulipas importadas da Holanda, disponíveis em cores vibrantes como rosa, roxo, amarelo e branco. Elegância e delicadeza em um presente verdadeiramente memorável.",
+    imgs:[
+      "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"8 tulipas", price:89},
+      {k:"M", label:"Médio", desc:"15 tulipas", price:149},
+      {k:"G", label:"Grande", desc:"25 tulipas", price:199}
+    ]
+  },
+  {
+    id:6, name:"Arranjo Tropical Colorido", cat:"Arranjos",
+    desc:"Flores tropicais exóticas como helicônias, proteácias e folhagens verdes. Traz vida, cor e personalidade a qualquer espaço ou evento.",
+    imgs:[
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1548093932-26d1d9b91e46?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"Vaso pequeno", price:79},
+      {k:"M", label:"Médio", desc:"Vaso médio", price:119},
+      {k:"G", label:"Grande", desc:"Vaso grande", price:169}
+    ]
+  },
+  {
+    id:7, name:"Girassóis Alegres", cat:"Buquês",
+    desc:"Girassóis radiantes que iluminam qualquer ambiente. Transmitem alegria, amizade e gratidão — o presente perfeito para animar alguém especial no seu dia.",
+    imgs:[
+      "https://images.unsplash.com/photo-1490750967868-88df5691cc73?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1487530811015-780aef0c96a1?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Pequeno", desc:"5 girassóis", price:69},
+      {k:"M", label:"Médio", desc:"10 girassóis", price:99},
+      {k:"G", label:"Grande", desc:"18 girassóis", price:149}
+    ]
+  },
+  {
+    id:8, name:"Orquídea Phalaenopsis", cat:"Plantas", badge:"Exclusivo",
+    desc:"Orquídea de ciclo longo com floração durável por meses. Sofisticada e delicada, é o presente ideal para decorar ambientes ou presentear alguém muito especial.",
+    imgs:[
+      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=700&auto=format&fit=crop&q=80"
+    ],
+    sizes:[
+      {k:"P", label:"Simples", desc:"1 haste · Vaso cerâmica", price:89},
+      {k:"M", label:"Dupla", desc:"2 hastes · Vaso cerâmica", price:149},
+      {k:"G", label:"Tripla", desc:"3 hastes · Vaso porcelana", price:209}
+    ]
+  }
+];
+
+// ── STATE ──
+let curFilter = 'Todas';
+let curProd = null;
+let selSize = 0;
+let qty = 1;
+
+// ── NAVIGATION ──
+function go(page, id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (page === 'home') {
+    document.getElementById('page-home').classList.add('active');
+    renderHome();
+  } else if (page === 'catalog') {
+    document.getElementById('page-catalog').classList.add('active');
+    renderCatalog();
+  } else if (page === 'product') {
+    document.getElementById('page-product').classList.add('active');
+    loadProduct(id);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function filterGo(cat) {
+  curFilter = cat;
+  go('catalog');
+  setTimeout(() => {
+    document.querySelectorAll('.f-btn').forEach(b => {
+      const label = b.textContent.replace(/[^\w\sÀ-ÿ]/g,'').trim();
+      b.classList.toggle('active', label === cat);
+    });
+  }, 10);
+}
+
+// ── RENDER HOME ──
+function renderHome() {
+  document.getElementById('home-prod').innerHTML =
+    products.slice(0,3).map(p => cardHTML(p)).join('');
+}
+
+// ── RENDER CATALOG ──
+function renderCatalog() {
+  const list = curFilter === 'Todas' ? products : products.filter(p => p.cat === curFilter);
+  document.getElementById('cat-prod').innerHTML = list.map(p => cardHTML(p)).join('');
+}
+
+function setFilter(cat, btn) {
+  curFilter = cat;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCatalog();
+}
+
+// ── CARD HTML ──
+function cardHTML(p) {
+  return `<div class="prod-card" onclick="go('product',${p.id})">
+    <div class="prod-img">
+      <img src="${p.imgs[0]}" alt="${p.name}" loading="lazy">
+      ${p.badge ? `<span class="prod-badge">${p.badge}</span>` : ''}
+    </div>
+    <div class="prod-info">
+      <div class="prod-cat">${p.cat}</div>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-price">A partir de <strong>R$ ${p.sizes[0].price},00</strong></div>
+      <button class="prod-btn">Ver opções de tamanho →</button>
+    </div>
+  </div>`;
+}
+
+// ── LOAD PRODUCT ──
+function loadProduct(id) {
+  curProd = products.find(p => p.id === id);
+  if (!curProd) return;
+  qty = 1; selSize = 0;
+
+  document.getElementById('bc-name').textContent = curProd.name;
+  document.getElementById('d-cat').textContent = curProd.cat;
+  document.getElementById('d-name').textContent = curProd.name;
+  document.getElementById('d-desc').textContent = curProd.desc;
+  document.getElementById('qty-n').value = 1;
+
+  // Gallery
+  document.getElementById('gal-main').src = curProd.imgs[0];
+  document.getElementById('gal-main').alt = curProd.name;
+  document.getElementById('gal-thumbs').innerHTML = curProd.imgs.map((img, i) =>
+    `<div class="thumb ${i===0?'active':''}" onclick="setImg(this,'${img}')">
+      <img src="${img}" alt="">
+    </div>`
+  ).join('');
+
+  // Sizes
+  document.getElementById('d-sizes').innerHTML = curProd.sizes.map((s, i) =>
+    `<div class="size-opt ${i===0?'sel':''}" onclick="selSz(this,${i})">
+      <span class="sn">${s.k}</span>
+      <span class="sd">${s.label}<br>${s.desc}</span>
+      <span class="sp">R$ ${s.price},00</span>
+    </div>`
+  ).join('');
+
+  updTotal();
+}
+
+function setImg(el, src) {
+  document.getElementById('gal-main').src = src;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selSz(el, idx) {
+  selSize = idx;
+  document.querySelectorAll('.size-opt').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
+  updTotal();
+}
+
+function chQty(d) {
+  qty = Math.max(1, qty + d);
+  document.getElementById('qty-n').value = qty;
+  updTotal();
+}
+
+function updTotal() {
+  if (!curProd) return;
+  const price = curProd.sizes[selSize].price;
+  document.getElementById('d-total').textContent =
+    'R$ ' + (price * qty).toFixed(2).replace('.',',');
+}
+
+function pedirWpp() {
+  if (!curProd) return;
+  const sz = curProd.sizes[selSize];
+  const total = (sz.price * qty).toFixed(2).replace('.',',');
+  const msg =
+    `Olá! Gostaria de fazer um pedido:\n\n` +
+    `🌸 *${curProd.name}*\n` +
+    `📏 Tamanho: ${sz.label} (${sz.k}) — ${sz.desc}\n` +
+    `🔢 Quantidade: ${qty}\n` +
+    `💰 Total estimado: R$ ${total}\n\n` +
+    `Aguardo confirmação, obrigado(a)!`;
+  window.open('https://wa.me/5531999999999?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Init
+renderHome();
+</script>
+</body>
+</html>
