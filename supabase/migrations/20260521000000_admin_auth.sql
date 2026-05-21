@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.admin_profiles (
 ALTER TABLE public.admin_profiles ENABLE ROW LEVEL SECURITY;
 
 -- Usuário autenticado só lê o próprio perfil
+DROP POLICY IF EXISTS "admin_profiles_select_own" ON public.admin_profiles;
 CREATE POLICY "admin_profiles_select_own"
   ON public.admin_profiles
   FOR SELECT

@@ -2,8 +2,11 @@ function getSupabase() {
   const cfg = window.VERDO_SUPABASE;
   if (!cfg?.url || !cfg?.anonKey) return null;
   if (cfg.url.includes('SEU_PROJETO') || cfg.anonKey.includes('SUA_CHAVE') || cfg.anonKey.includes('COLE_AQUI')) return null;
-  if (!window.supabase?.createClient) return null;
-  return window.supabase.createClient(cfg.url, cfg.anonKey);
+  if (typeof createSupabaseClient === 'function') return createSupabaseClient();
+  const lib = window.supabase;
+  const fn = lib?.createClient || lib?.default?.createClient;
+  if (!fn) return null;
+  return fn(cfg.url, cfg.anonKey);
 }
 
 async function rpcCanAccessPanel(sb) {

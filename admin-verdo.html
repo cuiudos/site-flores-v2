@@ -1256,11 +1256,11 @@ async function bootstrapAuth() {
     showConfigError('Configurar <em>Supabase</em>', 'Edite <strong>js/supabase-config.js</strong> com a URL e a chave anon do projeto.');
     return;
   }
-  if (!window.supabase?.createClient) {
+  sbClient = typeof createSupabaseClient === 'function' ? createSupabaseClient() : null;
+  if (!sbClient) {
     showConfigError('Erro ao carregar <em>Supabase</em>', 'A biblioteca não carregou. Desative bloqueador de anúncios, verifique a internet e clique em Recarregar.');
     return;
   }
-  sbClient = window.supabase.createClient(cfg.url, cfg.anonKey);
   setupAuthUI();
 
   const { data: { session } } = await sbClient.auth.getSession();
@@ -1290,9 +1290,24 @@ async function bootstrapAuth() {
 // ══════════════════════════════════════════════════
 
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-config.js?v=2"></script>
-<script src="js/auth.js?v=2"></script>
-<script>bootstrapAuth();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
+<script>
+window.VERDO_SUPABASE = window.VERDO_SUPABASE || {
+  url: 'https://vpxgbkxqwiktdqigrpmx.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZweGdia3hxd2lrdGRxaWdycG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNjExNTYsImV4cCI6MjA5NDkzNzE1Nn0.3EwrQal_Or4ZBRb7tZ4ODdJ_7rVxNAyq6hqPjfjTPAw'
+};
+function createSupabaseClient() {
+  const lib = window.supabase;
+  const fn = lib?.createClient || lib?.default?.createClient;
+  if (!fn || !window.VERDO_SUPABASE?.url) return null;
+  return fn(window.VERDO_SUPABASE.url, window.VERDO_SUPABASE.anonKey);
+}
+</script>
+<script src="js/auth.js?v=3"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof bootstrapAuth === 'function') bootstrapAuth();
+});
+</script>
 </body>
 </html>

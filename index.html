@@ -526,9 +526,20 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-config.js?v=2"></script>
-<script src="js/auth.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
+<script>
+window.VERDO_SUPABASE = window.VERDO_SUPABASE || {
+  url: 'https://vpxgbkxqwiktdqigrpmx.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZweGdia3hxd2lrdGRxaWdycG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNjExNTYsImV4cCI6MjA5NDkzNzE1Nn0.3EwrQal_Or4ZBRb7tZ4ODdJ_7rVxNAyq6hqPjfjTPAw'
+};
+function createSupabaseClient() {
+  const lib = window.supabase;
+  const fn = lib?.createClient || lib?.default?.createClient;
+  if (!fn || !window.VERDO_SUPABASE?.url) return null;
+  return fn(window.VERDO_SUPABASE.url, window.VERDO_SUPABASE.anonKey);
+}
+</script>
+<script src="js/auth.js?v=3"></script>
 <!-- ══════════ JS ══════════ -->
 <script>
 // ── PRODUCTS DATA (sincronizado pelo admin via localStorage) ──
