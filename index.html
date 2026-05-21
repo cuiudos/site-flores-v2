@@ -339,6 +339,7 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
   <div class="nav-links">
     <a onclick="go('home')">Início</a>
     <a onclick="go('catalog')">Catálogo</a>
+    <a id="admin-nav-link" href="admin-verdo.html" style="display:none">Admin</a>
     <a href="https://wa.me/5531999999999" target="_blank" class="nav-cta">📲 WhatsApp</a>
   </div>
   <div class="nav-hamburger" onclick="go('catalog')">
@@ -525,10 +526,15 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
 <!-- ══════════ JS ══════════ -->
 <script>
-// ── PRODUCTS DATA ──
-const products = [
+// ── PRODUCTS DATA (sincronizado pelo admin via localStorage) ──
+const STORE_KEY = 'verdo_store_catalog_v1';
+
+const defaultProducts = [
   {
     id:1, name:"Buquê de Rosas Vermelhas", cat:"Rosas", badge:"Mais pedido",
     desc:"Clássico e apaixonante, este buquê de rosas vermelhas é a declaração perfeita. Ideal para Dia dos Namorados, aniversários ou para surpreender a pessoa amada com muito carinho.",
@@ -636,6 +642,19 @@ const products = [
   }
 ];
 
+function loadProducts() {
+  try {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) { console.warn('Catálogo da loja:', e); }
+  return defaultProducts;
+}
+
+let products = loadProducts();
+
 // ── STATE ──
 let curFilter = 'Todas';
 let curProd = null;
@@ -678,7 +697,9 @@ function renderHome() {
 // ── RENDER CATALOG ──
 function renderCatalog() {
   const list = curFilter === 'Todas' ? products : products.filter(p => p.cat === curFilter);
-  document.getElementById('cat-prod').innerHTML = list.map(p => cardHTML(p)).join('');
+  document.getElementById('cat-prod').innerHTML = list.length
+    ? list.map(p => cardHTML(p)).join('')
+    : '<p style="text-align:center;color:var(--text-light);padding:3rem 1rem">Nenhum produto disponível no momento. Confira novamente em breve.</p>';
 }
 
 function setFilter(cat, btn) {
@@ -720,7 +741,7 @@ function loadProduct(id) {
   document.getElementById('gal-main').src = curProd.imgs[0];
   document.getElementById('gal-main').alt = curProd.name;
   document.getElementById('gal-thumbs').innerHTML = curProd.imgs.map((img, i) =>
-    `<div class="thumb ${i===0?'active':''}" onclick="setImg(this,'${img}')">
+    `<div class="thumb ${i===0?'active':''}" onclick="setImg(this,${i})">
       <img src="${img}" alt="">
     </div>`
   ).join('');
@@ -737,8 +758,9 @@ function loadProduct(id) {
   updTotal();
 }
 
-function setImg(el, src) {
-  document.getElementById('gal-main').src = src;
+function setImg(el, idx) {
+  if (!curProd || !curProd.imgs[idx]) return;
+  document.getElementById('gal-main').src = curProd.imgs[idx];
   document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
 }
@@ -777,8 +799,38 @@ function pedirWpp() {
   window.open('https://wa.me/5531999999999?text=' + encodeURIComponent(msg), '_blank');
 }
 
+// Recarrega catálogo ao voltar da aba do admin (mesmo navegador)
+window.addEventListener('storage', e => {
+  if (e.key === STORE_KEY) {
+    products = loadProducts();
+    const page = document.querySelector('.page.active');
+    if (page?.id === 'page-home') renderHome();
+    else if (page?.id === 'page-catalog') renderCatalog();
+    else if (page?.id === 'page-product' && curProd) loadProduct(curProd.id);
+  }
+});
+
+function refreshCatalog() {
+  products = loadProducts();
+  const page = document.querySelector('.page.active');
+  if (page?.id === 'page-home') renderHome();
+  else if (page?.id === 'page-catalog') renderCatalog();
+}
+
+async function updateAdminNavLink() {
+  const link = document.getElementById('admin-nav-link');
+  if (!link) return;
+  const sb = getSupabase();
+  if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const allowed = await rpcCanAccessPanel(sb);
+  if (allowed) link.style.display = '';
+}
+
 // Init
-renderHome();
+refreshCatalog();
+updateAdminNavLink();
 </script>
 </body>
 </html>

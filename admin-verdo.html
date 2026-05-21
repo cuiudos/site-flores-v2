@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdô Admin · Painel do Proprietário</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FDF6EE;--cream2:#F8F0E6;
+  --green-dark:#1E3A2F;--green-mid:#2D5A3D;--green-light:#8BA888;--green-pale:#E8F0E6;
+  --terra:#C4714A;--terra-light:#E8956D;
+  --brown:#2C1810;--text:#3D2B1F;--text-light:#7A6355;
+  --border:#E8DDD4;--card-bg:#FEFAF6;--white:#FFFFFF;
+  --red:#B94040;--red-pale:#FDEAEA;
+  --amber:#B07D2A;--amber-pale:#FDF4E1;
+  --success:#2D6E4A;--success-pale:#E6F2EC;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark);height:60px;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(0,0,0,0.25)}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--cream);letter-spacing:-0.01em}
+.nav-logo em{font-style:italic;color:var(--terra-light)}
+.nav-logo span{font-size:0.7rem;font-weight:400;color:var(--green-light);margin-left:0.6rem;letter-spacing:0.08em;text-transform:uppercase;vertical-align:middle}
+.nav-tabs{display:flex;gap:0.25rem}
+.nav-tab{background:none;border:none;color:var(--green-light);padding:0.5rem 1rem;border-radius:0.4rem;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.18s;letter-spacing:0.05em;text-transform:uppercase;font-family:'DM Sans',sans-serif}
+.nav-tab:hover{color:var(--cream);background:rgba(255,255,255,0.07)}
+.nav-tab.active{color:var(--cream);background:rgba(255,255,255,0.12)}
+.nav-badge{background:var(--red);color:white;border-radius:2rem;font-size:0.62rem;font-weight:700;padding:0.1rem 0.45rem;margin-left:0.3rem;vertical-align:middle}
+
+/* LAYOUT */
+.main{padding-top:60px;min-height:100vh}
+.page{display:none;padding:2rem}
+.page.active{display:block}
+
+/* ALERTS */
+.alert-bar{background:var(--red-pale);border:1px solid #e8b4b4;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.75rem}
+.alert-bar.hidden{display:none}
+.alert-icon{font-size:1.2rem;flex-shrink:0;margin-top:0.05rem}
+.alert-body strong{display:block;color:var(--red);font-size:0.85rem;font-weight:600;margin-bottom:0.25rem}
+.alert-body p{font-size:0.82rem;color:#8B3A3A;line-height:1.5}
+.alert-items{margin-top:0.4rem;display:flex;flex-wrap:wrap;gap:0.4rem}
+.alert-pill{background:#e8b4b4;color:#6B2424;font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:2rem}
+
+/* SECTION TITLE */
+.sect-title{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:400;color:var(--green-dark);margin-bottom:0.25rem}
+.sect-title em{font-style:italic;color:var(--terra)}
+.sect-sub{color:var(--text-light);font-size:0.85rem;margin-bottom:1.75rem}
+
+/* METRIC CARDS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.metric{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1.25rem 1.5rem}
+.metric-label{font-size:0.72rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem}
+.metric-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--green-dark);line-height:1}
+.metric-sub{font-size:0.75rem;color:var(--text-light);margin-top:0.3rem}
+.metric.alert-metric{border-color:#e8b4b4;background:var(--red-pale)}
+.metric.alert-metric .metric-value{color:var(--red)}
+
+/* CHARTS ROW */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:2rem}
+.chart-card{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1.5rem}
+.chart-title{font-size:0.8rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1.25rem}
+.chart-wrap{position:relative;width:100%}
+
+/* TOP FLOWERS TABLE */
+.top-table{width:100%;border-collapse:collapse}
+.top-table th{font-size:0.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;padding:0 0.75rem 0.75rem;text-align:left;border-bottom:1px solid var(--border)}
+.top-table td{padding:0.75rem;font-size:0.85rem;border-bottom:1px solid var(--border)}
+.top-table tr:last-child td{border-bottom:none}
+.top-rank{font-weight:700;color:var(--terra);font-family:'Cormorant Garamond',serif;font-size:1.1rem}
+.top-bar{height:6px;background:var(--green-pale);border-radius:3px;margin-top:4px;overflow:hidden}
+.top-bar-fill{height:100%;background:var(--green-mid);border-radius:3px;transition:width 0.4s}
+
+/* CATALOG PAGE */
+.catalog-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.search-box{position:relative;flex:1;max-width:320px}
+.search-box input{width:100%;padding:0.55rem 0.75rem 0.55rem 2.2rem;border:1px solid var(--border);border-radius:0.65rem;font-size:0.85rem;background:var(--card-bg);font-family:'DM Sans',sans-serif;outline:none;color:var(--text)}
+.search-box input:focus{border-color:var(--green-light)}
+.search-icon{position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:var(--text-light);font-size:0.95rem;pointer-events:none}
+.btn{padding:0.55rem 1.25rem;border-radius:0.65rem;font-size:0.82rem;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.18s}
+.btn-primary{background:var(--green-dark);color:var(--cream)}
+.btn-primary:hover{background:var(--green-mid)}
+.btn-danger{background:var(--red-pale);color:var(--red);border:1px solid #e8b4b4}
+.btn-danger:hover{background:#f8d5d5}
+.btn-sm{padding:0.35rem 0.85rem;font-size:0.78rem}
+.btn-secondary{background:var(--cream2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+
+/* CATALOG TABLE */
+.catalog-table-wrap{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
+.catalog-table{width:100%;border-collapse:collapse}
+.catalog-table th{font-size:0.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;padding:1rem 1.25rem;text-align:left;background:var(--cream2);border-bottom:1px solid var(--border)}
+.catalog-table td{padding:0.9rem 1.25rem;font-size:0.85rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.catalog-table tr:last-child td{border-bottom:none}
+.catalog-table tr:hover td{background:var(--cream2)}
+.stock-badge{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.72rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:2rem}
+.stock-ok{background:var(--success-pale);color:var(--success)}
+.stock-low{background:var(--amber-pale);color:var(--amber)}
+.stock-zero{background:var(--red-pale);color:var(--red)}
+.flower-name{font-weight:500;color:var(--green-dark)}
+.flower-cat{font-size:0.72rem;color:var(--terra);font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.actions{display:flex;gap:0.5rem}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(30,58,47,0.55);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-bg.hidden{display:none}
+.modal{background:var(--white);border-radius:1.25rem;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;color:var(--green-dark);margin-bottom:1.5rem}
+.modal h2 em{font-style:italic;color:var(--terra)}
+.form-row{margin-bottom:1.1rem}
+.form-row label{display:block;font-size:0.75rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border);border-radius:0.65rem;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);outline:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--green-light);background:white}
+.form-row textarea{resize:vertical;min-height:80px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.modal-actions{display:flex;gap:0.75rem;margin-top:1.5rem}
+.modal-actions .btn{flex:1;padding:0.75rem;font-size:0.88rem}
+.sizes-section{border:1px solid var(--border);border-radius:0.75rem;padding:1rem;margin-bottom:1.1rem;background:var(--cream)}
+.sizes-section h4{font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem}
+.size-row{display:grid;grid-template-columns:60px 1fr 80px 90px;gap:0.5rem;margin-bottom:0.5rem;align-items:center}
+.size-row input{padding:0.45rem 0.55rem;font-size:0.82rem}
+.size-row label{font-size:0.7rem;color:var(--text-light)}
+.img-upload-zone{border:2px dashed var(--border);border-radius:0.75rem;padding:1.25rem;text-align:center;cursor:pointer;background:var(--cream);transition:border-color 0.2s}
+.img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--green-light)}
+.img-upload-zone input{display:none}
+.img-upload-zone p{font-size:0.82rem;color:var(--text-light);margin-top:0.35rem}
+.img-upload-zone strong{color:var(--green-dark);font-size:0.85rem}
+.img-previews{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem}
+.img-preview{position:relative;width:76px;height:76px;border-radius:0.5rem;overflow:hidden;border:1px solid var(--border)}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.img-preview .img-rm{position:absolute;top:3px;right:3px;width:22px;height:22px;border:none;border-radius:50%;background:rgba(185,64,64,0.9);color:white;font-size:0.75rem;cursor:pointer;line-height:1;padding:0}
+.modal{max-width:560px}
+
+/* SALES PAGE */
+.sales-toolbar{display:flex;gap:1rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.sales-toolbar select,.sales-toolbar input{padding:0.5rem 0.85rem;border:1px solid var(--border);border-radius:0.65rem;font-size:0.85rem;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card-bg);outline:none}
+.sales-toolbar select:focus,.sales-toolbar input:focus{border-color:var(--green-light)}
+.sales-table-wrap{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
+.sales-table{width:100%;border-collapse:collapse}
+.sales-table th{font-size:0.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;padding:1rem 1.25rem;text-align:left;background:var(--cream2);border-bottom:1px solid var(--border)}
+.sales-table td{padding:0.85rem 1.25rem;font-size:0.85rem;border-bottom:1px solid var(--border)}
+.sales-table tr:last-child td{border-bottom:none}
+.sale-profit{color:var(--success);font-weight:600}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--green-dark);color:var(--cream);padding:0.9rem 1.5rem;border-radius:0.75rem;font-size:0.85rem;font-weight:500;z-index:999;transform:translateY(100px);opacity:0;transition:all 0.3s;box-shadow:0 8px 30px rgba(30,58,47,0.4)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:var(--red)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:3rem;color:var(--text-light)}
+.empty svg{opacity:0.3;margin-bottom:1rem}
+.empty p{font-size:0.9rem}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--green-dark)}
+.auth-card{background:var(--white);border-radius:1.25rem;padding:2rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.auth-card h1{font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:400;color:var(--green-dark);margin-bottom:0.35rem}
+.auth-card h1 em{font-style:italic;color:var(--terra)}
+.auth-card > p{font-size:0.85rem;color:var(--text-light);margin-bottom:1.5rem;line-height:1.5}
+.auth-card .form-row{margin-bottom:1rem}
+.auth-card .btn{width:100%;padding:0.8rem;margin-top:0.25rem}
+.auth-msg{font-size:0.82rem;margin-top:0.75rem;padding:0.65rem 0.85rem;border-radius:0.5rem;display:none}
+.auth-msg.show{display:block}
+.auth-msg.err{background:var(--red-pale);color:var(--red)}
+.auth-msg.ok{background:var(--success-pale);color:var(--success)}
+.auth-step.hidden{display:none}
+.nav-logout{margin-left:auto;background:rgba(255,255,255,0.1);color:var(--green-light);border:1px solid rgba(255,255,255,0.2);padding:0.4rem 0.85rem;border-radius:0.4rem;font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.nav-logout:hover{color:var(--cream);background:rgba(255,255,255,0.15)}
+#app-shell.hidden{display:none}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .metrics{grid-template-columns:1fr}
+  .page{padding:1rem}
+  nav{padding:0 1rem}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
+</head>
+<body>
+
+<!-- Tela de login (só quem passa na RPC admin_login_allowed vê o passo da senha) -->
+<div id="auth-login" class="auth-screen hidden">
+  <div class="auth-card">
+    <h1>Verdô <em>Admin</em></h1>
+    <p>Acesso restrito ao painel da loja.</p>
+    <div id="auth-step-email" class="auth-step">
+      <div class="form-row">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="username">
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-check-email">Continuar</button>
+    </div>
+    <div id="auth-step-password" class="auth-step hidden">
+      <div class="form-row">
+        <label>Senha</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-login">Entrar no painel</button>
+      <button type="button" class="btn btn-secondary" style="margin-top:0.5rem" id="btn-back-email">← Outro e-mail</button>
+    </div>
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<div id="auth-denied" class="auth-screen hidden">
+  <div class="auth-card">
+    <h1>Acesso <em>negado</em></h1>
+    <p>Sua conta não tem permissão para o painel admin. Peça ao proprietário para ativar <code>can_access_admin</code> no banco.</p>
+    <button type="button" class="btn btn-secondary" id="btn-denied-out">Sair</button>
+  </div>
+</div>
+
+<div id="auth-config" class="auth-screen hidden">
+  <div class="auth-card">
+    <h1>Configurar <em>Supabase</em></h1>
+    <p>Edite <strong>js/supabase-config.js</strong> com a URL e a chave anon do projeto. Veja instruções em <strong>supabase/README.md</strong>.</p>
+  </div>
+</div>
+
+<div id="app-shell" class="hidden">
+<nav>
+  <div class="nav-logo">Verdô <em>Flores</em> <span>Admin</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">📊 Dashboard</button>
+    <button class="nav-tab" onclick="showPage('catalog')" id="tab-catalog">🌸 Flores</button>
+    <button class="nav-tab" onclick="showPage('sales')" id="tab-sales">💰 Vendas</button>
+    <button class="nav-tab" onclick="showPage('register')">📝 Registrar Venda</button>
+  </div>
+  <button type="button" class="nav-logout" id="btn-logout">Sair</button>
+</nav>
+
+<div class="main">
+
+<!-- ══ DASHBOARD ══ -->
+<div id="page-dashboard" class="page active">
+  <div id="stock-alert" class="alert-bar hidden">
+    <span class="alert-icon">🚨</span>
+    <div class="alert-body">
+      <strong>Atenção: flores sem estoque — reposição necessária!</strong>
+      <p>As flores abaixo estão com estoque zerado e ficaram invisíveis no site. Reponha o estoque para reativá-las.</p>
+      <div class="alert-items" id="alert-items"></div>
+    </div>
+  </div>
+  <div id="low-alert" class="alert-bar hidden" style="background:var(--amber-pale);border-color:#e8d4a0">
+    <span class="alert-icon">⚠️</span>
+    <div class="alert-body">
+      <strong style="color:var(--amber)">Estoque baixo — atenção!</strong>
+      <p style="color:#7A5A20">Estas flores estão com poucas unidades restantes:</p>
+      <div class="alert-items" id="low-items"></div>
+    </div>
+  </div>
+
+  <div class="sect-title">Dashboard <em>Verdô</em></div>
+  <p class="sect-sub">Visão geral das vendas, lucros e estoque da sua loja</p>
+
+  <div class="metrics" id="metrics-row">
+    <div class="metric"><div class="metric-label">Total de Vendas</div><div class="metric-value" id="m-vendas">0</div><div class="metric-sub">pedidos registrados</div></div>
+    <div class="metric"><div class="metric-label">Receita Total</div><div class="metric-value" id="m-receita">R$ 0</div><div class="metric-sub">faturamento bruto</div></div>
+    <div class="metric"><div class="metric-label">Lucro Estimado</div><div class="metric-value" id="m-lucro">R$ 0</div><div class="metric-sub">margem de 40%</div></div>
+    <div class="metric" id="m-sem-stock-card"><div class="metric-label">Flores sem Estoque</div><div class="metric-value" id="m-semstock">0</div><div class="metric-sub">precisam de reposição</div></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Receita por Mês</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chart-monthly" role="img" aria-label="Receita por mês">Gráfico de receita mensal.</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Flores mais vendidas</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chart-top" role="img" aria-label="Top flores vendidas">Gráfico de flores mais vendidas.</canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Ranking de Flores</div>
+    <table class="top-table" id="top-table">
+      <thead><tr><th>#</th><th>Flor</th><th>Categoria</th><th>Unidades vendidas</th><th>Receita</th></tr></thead>
+      <tbody id="top-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ FLORES (CATALOG) ══ -->
+<div id="page-catalog" class="page">
+  <div class="sect-title">Gerenciar <em>Flores</em></div>
+  <p class="sect-sub">Adicione fotos, preços e descrição — produtos com estoque aparecem automaticamente na loja</p>
+
+  <div class="catalog-toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Buscar flor..." id="search-input" oninput="renderCatalogTable()">
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">+ Adicionar Flor</button>
+  </div>
+
+  <div class="catalog-table-wrap">
+    <table class="catalog-table">
+      <thead><tr><th>Nome</th><th>Categoria</th><th>Tamanhos / Preços</th><th>Estoque</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="catalog-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ VENDAS ══ -->
+<div id="page-sales" class="page">
+  <div class="sect-title">Histórico de <em>Vendas</em></div>
+  <p class="sect-sub">Todas as vendas registradas na sua loja</p>
+
+  <div class="sales-toolbar">
+    <select id="filter-flower" onchange="renderSalesTable()">
+      <option value="">Todas as flores</option>
+    </select>
+    <select id="filter-month" onchange="renderSalesTable()">
+      <option value="">Todos os meses</option>
+    </select>
+    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+  </div>
+
+  <div class="sales-table-wrap">
+    <table class="sales-table">
+      <thead><tr><th>Data</th><th>Flor</th><th>Tamanho</th><th>Qtd</th><th>Preço unit.</th><th>Total</th><th>Lucro Est.</th><th>Ações</th></tr></thead>
+      <tbody id="sales-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ REGISTRAR VENDA ══ -->
+<div id="page-register" class="page">
+  <div class="sect-title">Registrar <em>Venda</em></div>
+  <p class="sect-sub">Registre manualmente uma venda realizada pelo WhatsApp</p>
+
+  <div style="max-width:520px;background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:2rem">
+    <div class="form-row">
+      <label>Flor</label>
+      <select id="reg-flower" onchange="updateSizeOpts()">
+        <option value="">Selecione a flor...</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Tamanho</label>
+      <select id="reg-size"><option value="">Selecione o tamanho...</option></select>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Quantidade</label>
+        <input type="number" id="reg-qty" min="1" value="1" oninput="updateRegTotal()">
+      </div>
+      <div class="form-row">
+        <label>Data do pedido</label>
+        <input type="date" id="reg-date">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Total previsto</label>
+      <input type="text" id="reg-total-preview" readonly style="background:var(--green-pale);font-weight:600;color:var(--green-dark)">
+    </div>
+    <div class="form-row">
+      <label>Notas (opcional)</label>
+      <textarea id="reg-notes" placeholder="Ex: entrega para aniversário, pagamento no dinheiro..."></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:0.85rem;font-size:0.95rem" onclick="registerSale()">✅ Registrar Venda</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- MODAL ADD/EDIT -->
+<div class="modal-bg hidden" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="modal-title">Adicionar <em>Flor</em></h2>
+    <input type="hidden" id="modal-id">
+    <div class="form-row">
+      <label>Nome da flor</label>
+      <input type="text" id="m-name" placeholder="Ex: Buquê de Rosas Vermelhas">
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Categoria</label>
+        <select id="m-cat">
+          <option>Rosas</option><option>Buquês</option><option>Arranjos</option><option>Plantas</option><option>Especiais</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Estoque (unid.)</label>
+        <input type="number" id="m-stock" min="0" value="10">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Descrição</label>
+      <textarea id="m-desc" placeholder="Descrição do produto..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Fotos do produto (JPG, JPEG ou PNG · até 5)</label>
+      <div class="img-upload-zone" id="img-drop-zone" onclick="document.getElementById('m-images').click()">
+        <input type="file" id="m-images" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple>
+        <strong>📷 Clique ou arraste as fotos aqui</strong>
+        <p>Máx. 5 imagens · 1,5 MB cada</p>
+      </div>
+      <div class="img-previews" id="img-previews"></div>
+    </div>
+    <div class="sizes-section">
+      <h4>Tamanhos e Preços</h4>
+      <div class="size-row" style="margin-bottom:0.25rem">
+        <span style="font-size:0.7rem;color:var(--text-light)">Sigla</span>
+        <span style="font-size:0.7rem;color:var(--text-light)">Rótulo</span>
+        <span style="font-size:0.7rem;color:var(--text-light)">Preço R$</span>
+        <span style="font-size:0.7rem;color:var(--text-light)">Custo R$</span>
+      </div>
+      <div class="size-row"><input id="sz1k" value="P" maxlength="2"><input id="sz1l" value="Pequeno"><input id="sz1p" type="number" value="89"><input id="sz1c" type="number" value="45"></div>
+      <div class="size-row"><input id="sz2k" value="M" maxlength="2"><input id="sz2l" value="Médio"><input id="sz2p" type="number" value="139"><input id="sz2c" type="number" value="70"></div>
+      <div class="size-row"><input id="sz3k" value="G" maxlength="2"><input id="sz3l" value="Grande"><input id="sz3p" type="number" value="219"><input id="sz3c" type="number" value="110"></div>
+    </div>
+    <div class="form-row">
+      <label>Destaque (badge opcional)</label>
+      <input type="text" id="m-badge" placeholder="Ex: Mais pedido, Novidade, Premium...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModalDirect()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFlower()">Salvar Flor</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-bg hidden" id="confirm-bg">
+  <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
+    <h2>Confirmar <em>exclusão</em></h2>
+    <p style="color:var(--text-light);font-size:0.9rem;margin-bottom:1.5rem" id="confirm-text"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('confirm-bg').classList.add('hidden')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  DATABASE LAYER (sql.js + localStorage persistence)
+// ══════════════════════════════════════════════════
+
+let db = null;
+const DB_KEY = 'verdo_admin_db_v1';
+const STORE_KEY = 'verdo_store_catalog_v1';
+const MAX_IMAGES = 5;
+const MAX_IMG_BYTES = 1.5 * 1024 * 1024;
+let pendingImages = [];
+
+async function initDB() {
+  const SQL = await initSqlJs({
+    locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
+  });
+
+  const saved = localStorage.getItem(DB_KEY);
+  if (saved) {
+    const buf = Uint8Array.from(atob(saved), c => c.charCodeAt(0));
+    db = new SQL.Database(buf);
+  } else {
+    db = new SQL.Database();
+    createSchema();
+    seedData();
+  }
+  migrateSchema();
+  saveDB();
+  syncStoreCatalog();
+}
+
+function createSchema() {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS flowers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      category TEXT,
+      description TEXT,
+      badge TEXT,
+      stock INTEGER DEFAULT 10,
+      active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS sizes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      flower_id INTEGER,
+      key TEXT,
+      label TEXT,
+      price REAL,
+      cost REAL,
+      FOREIGN KEY(flower_id) REFERENCES flowers(id)
+    );
+    CREATE TABLE IF NOT EXISTS sales (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      flower_id INTEGER,
+      flower_name TEXT,
+      size_key TEXT,
+      size_label TEXT,
+      qty INTEGER,
+      unit_price REAL,
+      unit_cost REAL,
+      total REAL,
+      profit REAL,
+      sale_date TEXT,
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY(flower_id) REFERENCES flowers(id)
+    );
+  `);
+}
+
+function migrateSchema() {
+  db.run(`CREATE TABLE IF NOT EXISTS flower_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    flower_id INTEGER NOT NULL,
+    sort_order INTEGER DEFAULT 0,
+    data_url TEXT NOT NULL,
+    FOREIGN KEY(flower_id) REFERENCES flowers(id) ON DELETE CASCADE
+  )`);
+}
+
+const IMG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23E8F0E6' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%238BA888' font-family='sans-serif' font-size='20'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E";
+
+function syncStoreCatalog() {
+  const flowers = query('SELECT * FROM flowers WHERE stock > 0 ORDER BY name');
+  const catalog = flowers.map(f => {
+    const sizes = query('SELECT * FROM sizes WHERE flower_id=? ORDER BY price', [f.id]);
+    const imgs = query('SELECT data_url FROM flower_images WHERE flower_id=? ORDER BY sort_order', [f.id])
+      .map(r => r.data_url);
+    return {
+      id: f.id,
+      name: f.name,
+      cat: f.category,
+      badge: f.badge || '',
+      desc: f.description || '',
+      imgs: imgs.length ? imgs : [IMG_PLACEHOLDER],
+      sizes: sizes.map(s => ({
+        k: s.key,
+        label: s.label,
+        desc: s.label,
+        price: s.price
+      }))
+    };
+  });
+  localStorage.setItem(STORE_KEY, JSON.stringify(catalog));
+}
+
+function seedData() {
+  const flowers = [
+    {name:"Buquê de Rosas Vermelhas",cat:"Rosas",badge:"Mais pedido",desc:"Clássico e apaixonante, perfeito para declarações.",stock:15,sizes:[{k:"P",l:"Pequeno",p:89,c:40},{k:"M",l:"Médio",p:139,c:65},{k:"G",l:"Grande",p:219,c:100}]},
+    {name:"Mix de Gérberas Coloridas",cat:"Buquês",badge:"Novidade",desc:"Buquê vibrante para comemorações e aniversários.",stock:8,sizes:[{k:"P",l:"Pequeno",p:79,c:35},{k:"M",l:"Médio",p:119,c:55},{k:"G",l:"Grande",p:169,c:80}]},
+    {name:"Arranjo de Lírios Brancos",cat:"Arranjos",badge:"",desc:"Sofisticado e elegante, transmite paz e pureza.",stock:5,sizes:[{k:"P",l:"Pequeno",p:99,c:45},{k:"M",l:"Médio",p:149,c:70},{k:"G",l:"Grande",p:219,c:105}]},
+    {name:"Buquê Romântico Premium",cat:"Buquês",badge:"Premium",desc:"Composição exclusiva com rosas e ranúnculos.",stock:0,sizes:[{k:"P",l:"Pequeno",p:119,c:55},{k:"M",l:"Médio",p:179,c:85},{k:"G",l:"Grande",p:249,c:120}]},
+    {name:"Tulipas Holandesas",cat:"Especiais",badge:"",desc:"Importadas da Holanda, elegância e delicadeza.",stock:3,sizes:[{k:"P",l:"Pequeno",p:89,c:50},{k:"M",l:"Médio",p:149,c:80},{k:"G",l:"Grande",p:199,c:110}]},
+    {name:"Arranjo Tropical Colorido",cat:"Arranjos",badge:"",desc:"Flores tropicais exóticas com vida e cor.",stock:12,sizes:[{k:"P",l:"Pequeno",p:79,c:35},{k:"M",l:"Médio",p:119,c:55},{k:"G",l:"Grande",p:169,c:80}]},
+    {name:"Girassóis Alegres",cat:"Buquês",badge:"",desc:"Girassóis radiantes que iluminam qualquer ambiente.",stock:0,sizes:[{k:"P",l:"Pequeno",p:69,c:30},{k:"M",l:"Médio",p:99,c:45},{k:"G",l:"Grande",p:149,c:70}]},
+    {name:"Orquídea Phalaenopsis",cat:"Plantas",badge:"Exclusivo",desc:"Floração durável por meses. Sofisticada e delicada.",stock:7,sizes:[{k:"P",l:"Simples",p:89,c:50},{k:"M",l:"Dupla",p:149,c:85},{k:"G",l:"Tripla",p:209,c:120}]},
+  ];
+
+  for (const f of flowers) {
+    db.run(`INSERT INTO flowers(name,category,description,badge,stock) VALUES(?,?,?,?,?)`,
+      [f.name, f.cat, f.desc, f.badge, f.stock]);
+    const fid = db.exec('SELECT last_insert_rowid() as id')[0].values[0][0];
+    for (const s of f.sizes) {
+      db.run(`INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)`,
+        [fid, s.k, s.l, s.p, s.c]);
+    }
+  }
+
+  // Seed some sales
+  const salesData = [
+    {fid:1,fname:"Buquê de Rosas Vermelhas",sk:"M",sl:"Médio",qty:3,up:139,uc:65,date:"2026-04-05"},
+    {fid:1,fname:"Buquê de Rosas Vermelhas",sk:"G",sl:"Grande",qty:2,up:219,uc:100,date:"2026-04-12"},
+    {fid:2,fname:"Mix de Gérberas Coloridas",sk:"P",sl:"Pequeno",qty:4,up:79,uc:35,date:"2026-04-08"},
+    {fid:3,fname:"Arranjo de Lírios Brancos",sk:"M",sl:"Médio",qty:2,up:149,uc:70,date:"2026-04-15"},
+    {fid:4,fname:"Buquê Romântico Premium",sk:"G",sl:"Grande",qty:1,up:249,uc:120,date:"2026-04-20"},
+    {fid:8,fname:"Orquídea Phalaenopsis",sk:"M",sl:"Dupla",qty:2,up:149,uc:85,date:"2026-04-22"},
+    {fid:1,fname:"Buquê de Rosas Vermelhas",sk:"P",sl:"Pequeno",qty:5,up:89,uc:40,date:"2026-05-03"},
+    {fid:5,fname:"Tulipas Holandesas",sk:"M",sl:"Médio",qty:3,up:149,uc:80,date:"2026-05-07"},
+    {fid:7,fname:"Girassóis Alegres",sk:"G",sl:"Grande",qty:2,up:149,uc:70,date:"2026-05-10"},
+    {fid:2,fname:"Mix de Gérberas Coloridas",sk:"G",sl:"Grande",qty:2,up:169,uc:80,date:"2026-05-14"},
+    {fid:6,fname:"Arranjo Tropical Colorido",sk:"M",sl:"Médio",qty:3,up:119,uc:55,date:"2026-05-16"},
+    {fid:1,fname:"Buquê de Rosas Vermelhas",sk:"G",sl:"Grande",qty:4,up:219,uc:100,date:"2026-05-18"},
+    {fid:8,fname:"Orquídea Phalaenopsis",sk:"G",sl:"Tripla",qty:1,up:209,uc:120,date:"2026-05-19"},
+    {fid:3,fname:"Arranjo de Lírios Brancos",sk:"G",sl:"Grande",qty:1,up:219,uc:105,date:"2026-05-20"},
+  ];
+
+  for (const s of salesData) {
+    const t = s.qty * s.up;
+    const p = s.qty * (s.up - s.uc);
+    db.run(`INSERT INTO sales(flower_id,flower_name,size_key,size_label,qty,unit_price,unit_cost,total,profit,sale_date,notes) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+      [s.fid, s.fname, s.sk, s.sl, s.qty, s.up, s.uc, t, p, s.date, '']);
+  }
+}
+
+function saveDB() {
+  const data = db.export();
+  const b64 = btoa(String.fromCharCode(...data));
+  localStorage.setItem(DB_KEY, b64);
+}
+
+function query(sql, params=[]) {
+  try {
+    const res = db.exec(sql, params);
+    if (!res.length) return [];
+    const {columns, values} = res[0];
+    return values.map(row => Object.fromEntries(columns.map((c,i) => [c, row[i]])));
+  } catch(e) { console.error(e); return []; }
+}
+
+function run(sql, params=[]) {
+  db.run(sql, params);
+  saveDB();
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'catalog') renderCatalogTable();
+  if (name === 'sales') { populateSalesFilters(); renderSalesTable(); }
+  if (name === 'register') populateRegisterForm();
+}
+
+// ══════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════
+
+let monthlyChart = null;
+let topChart = null;
+
+function renderDashboard() {
+  const sales = query('SELECT * FROM sales');
+  const flowers = query('SELECT * FROM flowers');
+  const zeroStock = flowers.filter(f => f.stock === 0);
+  const lowStock = flowers.filter(f => f.stock > 0 && f.stock <= 3);
+
+  const totalVendas = sales.reduce((a,s) => a + s.qty, 0);
+  const totalReceita = sales.reduce((a,s) => a + s.total, 0);
+  const totalLucro = sales.reduce((a,s) => a + s.profit, 0);
+
+  document.getElementById('m-vendas').textContent = totalVendas;
+  document.getElementById('m-receita').textContent = 'R$ ' + totalReceita.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('m-lucro').textContent = 'R$ ' + totalLucro.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('m-semstock').textContent = zeroStock.length;
+
+  const stockCard = document.getElementById('m-sem-stock-card');
+  stockCard.classList.toggle('alert-metric', zeroStock.length > 0);
+
+  // Zero stock alert
+  const alertBar = document.getElementById('stock-alert');
+  const alertItems = document.getElementById('alert-items');
+  if (zeroStock.length > 0) {
+    alertBar.classList.remove('hidden');
+    alertItems.innerHTML = zeroStock.map(f => `<span class="alert-pill">${f.name}</span>`).join('');
+  } else alertBar.classList.add('hidden');
+
+  // Low stock alert
+  const lowBar = document.getElementById('low-alert');
+  const lowItems = document.getElementById('low-items');
+  if (lowStock.length > 0) {
+    lowBar.classList.remove('hidden');
+    lowItems.innerHTML = lowStock.map(f => `<span class="alert-pill" style="background:#e8d4a0;color:#5a3d10">${f.name} (${f.stock} un.)</span>`).join('');
+  } else lowBar.classList.add('hidden');
+
+  // Monthly chart
+  const byMonth = {};
+  sales.forEach(s => {
+    const m = s.sale_date.slice(0,7);
+    byMonth[m] = (byMonth[m] || 0) + s.total;
+  });
+  const months = Object.keys(byMonth).sort();
+  const monthLabels = months.map(m => {
+    const [y,mo] = m.split('-');
+    return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][+mo-1]+'/'+y.slice(2);
+  });
+
+  if (monthlyChart) monthlyChart.destroy();
+  monthlyChart = new Chart(document.getElementById('chart-monthly'), {
+    type:'bar',
+    data:{
+      labels:monthLabels,
+      datasets:[{label:'Receita',data:months.map(m=>Math.round(byMonth[m])),
+        backgroundColor:'#2D5A3D',borderRadius:6,borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(0,0,0,0.05)'}},
+              x:{grid:{display:false}}}}
+  });
+
+  // Top flowers
+  const byFlower = {};
+  sales.forEach(s => {
+    if (!byFlower[s.flower_name]) byFlower[s.flower_name] = {qty:0,total:0};
+    byFlower[s.flower_name].qty += s.qty;
+    byFlower[s.flower_name].total += s.total;
+  });
+  const topFlowers = Object.entries(byFlower).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
+
+  if (topChart) topChart.destroy();
+  const topColors = ['#C4714A','#2D5A3D','#8BA888','#1E3A2F','#E8956D'];
+  topChart = new Chart(document.getElementById('chart-top'), {
+    type:'doughnut',
+    data:{
+      labels:topFlowers.map(([n])=>n.length>18?n.slice(0,17)+'…':n),
+      datasets:[{data:topFlowers.map(([,v])=>v.qty),backgroundColor:topColors,borderWidth:2,borderColor:'#FDF6EE'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:10}}}}
+  });
+
+  // Top table
+  const tbody = document.getElementById('top-tbody');
+  const maxQty = topFlowers[0]?.[1]?.qty || 1;
+  const flowerMap = Object.fromEntries(flowers.map(f=>[f.name,f.category]));
+  tbody.innerHTML = topFlowers.map(([name,v],i)=>`
+    <tr>
+      <td><span class="top-rank">${i+1}</span></td>
+      <td><div class="flower-name">${name}</div><div class="flower-cat">${flowerMap[name]||''}</div></td>
+      <td style="color:var(--text-light)">${flowerMap[name]||''}</td>
+      <td>
+        <div>${v.qty} unid.</div>
+        <div class="top-bar"><div class="top-bar-fill" style="width:${Math.round(v.qty/maxQty*100)}%"></div></div>
+      </td>
+      <td style="font-weight:600;color:var(--green-dark)">R$ ${v.total.toLocaleString('pt-BR',{minimumFractionDigits:0})}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" class="empty"><p>Nenhuma venda registrada ainda.</p></td></tr>';
+}
+
+// ══════════════════════════════════════════════════
+//  CATALOG
+// ══════════════════════════════════════════════════
+
+function renderCatalogTable() {
+  const search = (document.getElementById('search-input')?.value||'').toLowerCase();
+  let flowers = query('SELECT * FROM flowers ORDER BY id DESC');
+  if (search) flowers = flowers.filter(f=>f.name.toLowerCase().includes(search)||f.category.toLowerCase().includes(search));
+
+  const tbody = document.getElementById('catalog-tbody');
+  if (!flowers.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><p>Nenhuma flor encontrada.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = flowers.map(f => {
+    const sizes = query('SELECT * FROM sizes WHERE flower_id=?',[f.id]);
+    const priceRange = sizes.length ? `R$ ${sizes[0].price}–${sizes[sizes.length-1].price}` : '—';
+    const sizesLabel = sizes.map(s=>`<span style="font-size:0.75rem;background:var(--green-pale);color:var(--green-dark);padding:0.15rem 0.45rem;border-radius:0.3rem;margin-right:0.25rem">${s.key}: R$${s.price}</span>`).join('');
+
+    let stockBadge = '';
+    if (f.stock === 0) stockBadge = `<span class="stock-badge stock-zero">🚨 Sem estoque</span>`;
+    else if (f.stock <= 3) stockBadge = `<span class="stock-badge stock-low">⚠️ Baixo (${f.stock})</span>`;
+    else stockBadge = `<span class="stock-badge stock-ok">✅ ${f.stock} un.</span>`;
+
+    const statusBadge = f.stock > 0
+      ? `<span class="stock-badge stock-ok">Ativo</span>`
+      : `<span class="stock-badge stock-zero">Oculto no site</span>`;
+
+    return `<tr>
+      <td>
+        <div class="flower-name">${f.name}</div>
+        ${f.badge ? `<span style="font-size:0.68rem;color:var(--terra);font-weight:700">${f.badge}</span>` : ''}
+      </td>
+      <td><span class="flower-cat">${f.category}</span></td>
+      <td>${sizesLabel}</td>
+      <td>${stockBadge}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-secondary btn-sm" onclick="openEditModal(${f.id})">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete(${f.id},'${f.name.replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  IMAGES
+// ══════════════════════════════════════════════════
+
+function renderImagePreviews() {
+  document.getElementById('img-previews').innerHTML = pendingImages.map((src, i) =>
+    `<div class="img-preview">
+      <img src="${src}" alt="Foto ${i + 1}">
+      <button type="button" class="img-rm" onclick="removePendingImage(${i})" title="Remover">×</button>
+    </div>`
+  ).join('');
+}
+
+function removePendingImage(idx) {
+  pendingImages.splice(idx, 1);
+  renderImagePreviews();
+}
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1200;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const isPng = file.type === 'image/png';
+        resolve(canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', isPng ? 1 : 0.85));
+      };
+      img.onerror = () => reject(new Error('Imagem inválida'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageFiles(fileList) {
+  const files = Array.from(fileList).filter(f =>
+    /^image\/(jpeg|png)$/i.test(f.type) || /\.(jpe?g|png)$/i.test(f.name)
+  );
+  if (!files.length) {
+    toast('Use apenas JPG, JPEG ou PNG.', true);
+    return;
+  }
+  const slots = MAX_IMAGES - pendingImages.length;
+  if (slots <= 0) {
+    toast(`Máximo de ${MAX_IMAGES} fotos por produto.`, true);
+    return;
+  }
+  for (const file of files.slice(0, slots)) {
+    if (file.size > MAX_IMG_BYTES) {
+      toast(`"${file.name}" passa de 1,5 MB. Escolha uma foto menor.`, true);
+      continue;
+    }
+    try {
+      pendingImages.push(await compressImage(file));
+    } catch {
+      toast(`Não foi possível carregar "${file.name}".`, true);
+    }
+  }
+  renderImagePreviews();
+  document.getElementById('m-images').value = '';
+}
+
+function saveFlowerImages(flowerId) {
+  run('DELETE FROM flower_images WHERE flower_id=?', [flowerId]);
+  pendingImages.forEach((dataUrl, i) =>
+    run('INSERT INTO flower_images(flower_id,sort_order,data_url) VALUES(?,?,?)', [flowerId, i, dataUrl])
+  );
+}
+
+function setupImageUpload() {
+  const input = document.getElementById('m-images');
+  const zone = document.getElementById('img-drop-zone');
+  input.addEventListener('change', () => handleImageFiles(input.files));
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    handleImageFiles(e.dataTransfer.files);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  MODAL ADD / EDIT
+// ══════════════════════════════════════════════════
+
+function openAddModal() {
+  document.getElementById('modal-title').innerHTML = 'Adicionar <em>Flor</em>';
+  document.getElementById('modal-id').value = '';
+  ['m-name','m-desc','m-badge'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-stock').value = 10;
+  document.getElementById('m-cat').value = 'Rosas';
+  pendingImages = [];
+  renderImagePreviews();
+  [['sz1k','P','sz1l','Pequeno','sz1p',89,'sz1c',40],
+   ['sz2k','M','sz2l','Médio','sz2p',139,'sz2c',65],
+   ['sz3k','G','sz3l','Grande','sz3p',219,'sz3c',100]].forEach(s=>{
+     document.getElementById(s[0]).value=s[1];
+     document.getElementById(s[2]).value=s[3];
+     document.getElementById(s[4]).value=s[5];
+     document.getElementById(s[6]).value=s[7];
+  });
+  document.getElementById('modal-bg').classList.remove('hidden');
+}
+
+function openEditModal(id) {
+  const f = query('SELECT * FROM flowers WHERE id=?',[id])[0];
+  const sizes = query('SELECT * FROM sizes WHERE flower_id=? ORDER BY id',[id]);
+  if (!f) return;
+  document.getElementById('modal-title').innerHTML = 'Editar <em>Flor</em>';
+  document.getElementById('modal-id').value = id;
+  document.getElementById('m-name').value = f.name;
+  document.getElementById('m-cat').value = f.category;
+  document.getElementById('m-stock').value = f.stock;
+  document.getElementById('m-desc').value = f.description || '';
+  document.getElementById('m-badge').value = f.badge || '';
+  pendingImages = query('SELECT data_url FROM flower_images WHERE flower_id=? ORDER BY sort_order', [id])
+    .map(r => r.data_url);
+  renderImagePreviews();
+  [[0,'sz1k','sz1l','sz1p','sz1c'],[1,'sz2k','sz2l','sz2p','sz2c'],[2,'sz3k','sz3l','sz3p','sz3c']].forEach(([i,k,l,p,c])=>{
+    const s = sizes[i] || {};
+    document.getElementById(k).value = s.key||'';
+    document.getElementById(l).value = s.label||'';
+    document.getElementById(p).value = s.price||'';
+    document.getElementById(c).value = s.cost||'';
+  });
+  document.getElementById('modal-bg').classList.remove('hidden');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-bg')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modal-bg').classList.add('hidden');
+}
+
+function saveFlower() {
+  const id = document.getElementById('modal-id').value;
+  const name = document.getElementById('m-name').value.trim();
+  const cat = document.getElementById('m-cat').value;
+  const stock = parseInt(document.getElementById('m-stock').value)||0;
+  const desc = document.getElementById('m-desc').value.trim();
+  const badge = document.getElementById('m-badge').value.trim();
+
+  if (!name) { toast('Informe o nome da flor.', true); return; }
+  if (!pendingImages.length) { toast('Adicione pelo menos uma foto (JPG ou PNG).', true); return; }
+
+  const sizes = [
+    {k:document.getElementById('sz1k').value,l:document.getElementById('sz1l').value,p:parseFloat(document.getElementById('sz1p').value)||0,c:parseFloat(document.getElementById('sz1c').value)||0},
+    {k:document.getElementById('sz2k').value,l:document.getElementById('sz2l').value,p:parseFloat(document.getElementById('sz2p').value)||0,c:parseFloat(document.getElementById('sz2c').value)||0},
+    {k:document.getElementById('sz3k').value,l:document.getElementById('sz3l').value,p:parseFloat(document.getElementById('sz3p').value)||0,c:parseFloat(document.getElementById('sz3c').value)||0},
+  ].filter(s=>s.k && s.p);
+
+  let flowerId;
+  if (id) {
+    run('UPDATE flowers SET name=?,category=?,description=?,badge=?,stock=? WHERE id=?',[name,cat,desc,badge,stock,id]);
+    run('DELETE FROM sizes WHERE flower_id=?',[id]);
+    sizes.forEach(s=>run('INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)',[id,s.k,s.l,s.p,s.c]));
+    flowerId = parseInt(id, 10);
+    toast('Flor atualizada e publicada na loja!');
+  } else {
+    run('INSERT INTO flowers(name,category,description,badge,stock) VALUES(?,?,?,?,?)',[name,cat,desc,badge,stock]);
+    flowerId = query('SELECT last_insert_rowid() as id')[0].id;
+    sizes.forEach(s=>run('INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)',[flowerId,s.k,s.l,s.p,s.c]));
+    toast('Flor adicionada e publicada na loja!');
+  }
+  saveFlowerImages(flowerId);
+  syncStoreCatalog();
+  closeModalDirect();
+  renderCatalogTable();
+}
+
+function confirmDelete(id, name) {
+  document.getElementById('confirm-text').textContent = `Deseja excluir "${name}"? Esta ação também removerá os tamanhos associados.`;
+  document.getElementById('confirm-bg').classList.remove('hidden');
+  document.getElementById('confirm-ok').onclick = () => {
+    run('DELETE FROM flower_images WHERE flower_id=?',[id]);
+    run('DELETE FROM sizes WHERE flower_id=?',[id]);
+    run('DELETE FROM flowers WHERE id=?',[id]);
+    syncStoreCatalog();
+    document.getElementById('confirm-bg').classList.add('hidden');
+    renderCatalogTable();
+    toast('Flor removida do catálogo e da loja.');
+  };
+}
+
+// ══════════════════════════════════════════════════
+//  SALES
+// ══════════════════════════════════════════════════
+
+function populateSalesFilters() {
+  const flowers = query('SELECT DISTINCT flower_name FROM sales ORDER BY flower_name');
+  const fsel = document.getElementById('filter-flower');
+  fsel.innerHTML = '<option value="">Todas as flores</option>' +
+    flowers.map(f=>`<option value="${f.flower_name}">${f.flower_name}</option>`).join('');
+
+  const months = query('SELECT DISTINCT substr(sale_date,1,7) as m FROM sales ORDER BY m DESC');
+  const msel = document.getElementById('filter-month');
+  msel.innerHTML = '<option value="">Todos os meses</option>' +
+    months.map(({m})=>{
+      const [y,mo]=m.split('-');
+      const label=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][+mo-1]+' '+y;
+      return `<option value="${m}">${label}</option>`;
+    }).join('');
+}
+
+function renderSalesTable() {
+  const flower = document.getElementById('filter-flower').value;
+  const month = document.getElementById('filter-month').value;
+
+  let sql = 'SELECT * FROM sales WHERE 1=1';
+  const params = [];
+  if (flower) { sql += ' AND flower_name=?'; params.push(flower); }
+  if (month) { sql += ' AND substr(sale_date,1,7)=?'; params.push(month); }
+  sql += ' ORDER BY sale_date DESC, id DESC';
+
+  const sales = query(sql, params);
+  const tbody = document.getElementById('sales-tbody');
+
+  if (!sales.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><p>Nenhuma venda encontrada.</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sales.map(s => {
+    const date = new Date(s.sale_date+'T00:00:00').toLocaleDateString('pt-BR');
+    return `<tr>
+      <td>${date}</td>
+      <td><div class="flower-name">${s.flower_name}</div></td>
+      <td>${s.size_label} (${s.size_key})</td>
+      <td style="font-weight:600">${s.qty}</td>
+      <td>R$ ${s.unit_price.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td style="font-weight:600">R$ ${s.total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td class="sale-profit">R$ ${s.profit.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteSale(${s.id})">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteSale(id) {
+  run('DELETE FROM sales WHERE id=?',[id]);
+  renderSalesTable();
+  toast('Venda removida.');
+}
+
+function exportCSV() {
+  const sales = query('SELECT * FROM sales ORDER BY sale_date DESC');
+  const header = 'Data,Flor,Tamanho,Qtd,Preço Unit.,Total,Lucro Est.,Notas';
+  const rows = sales.map(s=>[s.sale_date,`"${s.flower_name}"`,s.size_label,s.qty,s.unit_price,s.total,s.profit,`"${s.notes||''}"`].join(','));
+  const csv = [header,...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = 'vendas-verdo-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+// ══════════════════════════════════════════════════
+//  REGISTER SALE
+// ══════════════════════════════════════════════════
+
+function populateRegisterForm() {
+  const flowers = query('SELECT * FROM flowers WHERE stock > 0 ORDER BY name');
+  const fsel = document.getElementById('reg-flower');
+  fsel.innerHTML = '<option value="">Selecione a flor...</option>' +
+    flowers.map(f=>`<option value="${f.id}">${f.name} (estoque: ${f.stock})</option>`).join('');
+  document.getElementById('reg-size').innerHTML = '<option value="">Selecione o tamanho...</option>';
+  document.getElementById('reg-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('reg-total-preview').value = '';
+  document.getElementById('reg-qty').value = 1;
+}
+
+function updateSizeOpts() {
+  const fid = document.getElementById('reg-flower').value;
+  const szel = document.getElementById('reg-size');
+  if (!fid) { szel.innerHTML = '<option value="">Selecione o tamanho...</option>'; return; }
+  const sizes = query('SELECT * FROM sizes WHERE flower_id=? ORDER BY price',[fid]);
+  szel.innerHTML = '<option value="">Selecione o tamanho...</option>' +
+    sizes.map(s=>`<option value="${s.id}" data-price="${s.price}" data-cost="${s.cost}">${s.label} (${s.key}) — R$ ${s.price}</option>`).join('');
+  updateRegTotal();
+}
+
+function updateRegTotal() {
+  const szel = document.getElementById('reg-size');
+  const opt = szel.options[szel.selectedIndex];
+  const qty = parseInt(document.getElementById('reg-qty').value)||1;
+  if (opt && opt.dataset.price) {
+    const total = (parseFloat(opt.dataset.price) * qty).toFixed(2).replace('.',',');
+    document.getElementById('reg-total-preview').value = 'R$ ' + total;
+  } else {
+    document.getElementById('reg-total-preview').value = '';
+  }
+}
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'reg-size') updateRegTotal();
+});
+
+function registerSale() {
+  const fid = document.getElementById('reg-flower').value;
+  const szel = document.getElementById('reg-size');
+  const sid = szel.value;
+  const qty = parseInt(document.getElementById('reg-qty').value)||1;
+  const date = document.getElementById('reg-date').value;
+  const notes = document.getElementById('reg-notes').value.trim();
+
+  if (!fid) { toast('Selecione a flor.', true); return; }
+  if (!sid) { toast('Selecione o tamanho.', true); return; }
+  if (!date) { toast('Informe a data.', true); return; }
+
+  const flower = query('SELECT * FROM flowers WHERE id=?',[fid])[0];
+  const size = query('SELECT * FROM sizes WHERE id=?',[sid])[0];
+  if (!flower || !size) { toast('Erro ao buscar dados.', true); return; }
+
+  const total = qty * size.price;
+  const profit = qty * (size.price - size.cost);
+
+  run(`INSERT INTO sales(flower_id,flower_name,size_key,size_label,qty,unit_price,unit_cost,total,profit,sale_date,notes)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+    [fid, flower.name, size.key, size.label, qty, size.price, size.cost, total, profit, date, notes]);
+
+  // Decrease stock
+  run('UPDATE flowers SET stock = MAX(0, stock-?) WHERE id=?',[qty, fid]);
+  syncStoreCatalog();
+
+  toast(`Venda registrada! Total: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`);
+  document.getElementById('reg-notes').value = '';
+  populateRegisterForm();
+}
+
+// ══════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════
+
+let toastTimer;
+function toast(msg, isError=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isError?' error':'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+// ══════════════════════════════════════════════════
+//  AUTH (Supabase + RPC)
+// ══════════════════════════════════════════════════
+
+let sbClient = null;
+let appStarted = false;
+let pendingLoginEmail = '';
+
+function showAuthEl(id) {
+  ['auth-login', 'auth-denied', 'auth-config', 'app-shell'].forEach(elId => {
+    document.getElementById(elId).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function setAuthMsg(text, isError) {
+  const el = document.getElementById('auth-msg');
+  el.textContent = text;
+  el.className = 'auth-msg show' + (isError ? ' err' : ' ok');
+}
+
+function clearAuthMsg() {
+  const el = document.getElementById('auth-msg');
+  el.className = 'auth-msg';
+  el.textContent = '';
+}
+
+async function startAdminApp() {
+  if (appStarted) return;
+  appStarted = true;
+  showAuthEl('app-shell');
+  await initDB();
+  setupImageUpload();
+  renderDashboard();
+  const zeroCount = query('SELECT COUNT(*) as c FROM flowers WHERE stock=0')[0]?.c || 0;
+  if (zeroCount > 0) {
+    const tab = document.getElementById('tab-catalog');
+    tab.innerHTML += `<span class="nav-badge">${zeroCount}</span>`;
+  }
+}
+
+async function handleSignedIn() {
+  const allowed = await rpcCanAccessPanel(sbClient);
+  if (allowed) await startAdminApp();
+  else {
+    await sbClient.auth.signOut();
+    showAuthEl('auth-denied');
+  }
+}
+
+function setupAuthUI() {
+  document.getElementById('btn-check-email').onclick = async () => {
+    clearAuthMsg();
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) { setAuthMsg('Informe o e-mail.', true); return; }
+    const allowed = await rpcAdminLoginAllowed(sbClient, email);
+    if (!allowed) {
+      setAuthMsg('Este e-mail não tem permissão para acessar o painel.', true);
+      return;
+    }
+    pendingLoginEmail = email;
+    document.getElementById('auth-step-email').classList.add('hidden');
+    document.getElementById('auth-step-password').classList.remove('hidden');
+    document.getElementById('login-password').focus();
+    setAuthMsg('E-mail autorizado. Digite sua senha.', false);
+  };
+
+  document.getElementById('btn-back-email').onclick = () => {
+    pendingLoginEmail = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('auth-step-password').classList.add('hidden');
+    document.getElementById('auth-step-email').classList.remove('hidden');
+    clearAuthMsg();
+  };
+
+  document.getElementById('btn-login').onclick = async () => {
+    clearAuthMsg();
+    const password = document.getElementById('login-password').value;
+    if (!password) { setAuthMsg('Informe a senha.', true); return; }
+    const { error } = await sbClient.auth.signInWithPassword({
+      email: pendingLoginEmail,
+      password
+    });
+    if (error) {
+      setAuthMsg(error.message === 'Invalid login credentials'
+        ? 'E-mail ou senha incorretos.'
+        : error.message, true);
+      return;
+    }
+    await handleSignedIn();
+  };
+
+  document.getElementById('btn-logout').onclick = () => sbClient.auth.signOut();
+  document.getElementById('btn-denied-out').onclick = () => sbClient.auth.signOut();
+
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-login').click();
+  });
+  document.getElementById('login-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-check-email').click();
+  });
+}
+
+async function bootstrapAuth() {
+  sbClient = getSupabase();
+  if (!sbClient) {
+    showAuthEl('auth-config');
+    return;
+  }
+  setupAuthUI();
+
+  const { data: { session } } = await sbClient.auth.getSession();
+  if (session) {
+    await handleSignedIn();
+    return;
+  }
+
+  showAuthEl('auth-login');
+
+  sbClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_OUT') {
+      appStarted = false;
+      pendingLoginEmail = '';
+      document.getElementById('auth-step-password').classList.add('hidden');
+      document.getElementById('auth-step-email').classList.remove('hidden');
+      document.getElementById('login-password').value = '';
+      clearAuthMsg();
+      showAuthEl('auth-login');
+    } else if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+      await handleSignedIn();
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+
+bootstrapAuth();
+</script>
+</body>
+</html>
