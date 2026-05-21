@@ -185,9 +185,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
   nav{padding:0 1rem}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/auth.js"></script>
 </head>
 <body>
 
@@ -225,8 +222,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
 
 <div id="auth-config" class="auth-screen hidden">
   <div class="auth-card">
-    <h1>Configurar <em>Supabase</em></h1>
-    <p>Edite <strong>js/supabase-config.js</strong> com a URL e a chave anon do projeto. Veja instruções em <strong>supabase/README.md</strong>.</p>
+    <h1 id="auth-config-title">Configurar <em>Supabase</em></h1>
+    <p id="auth-config-msg">Edite <strong>js/supabase-config.js</strong> com a URL e a chave anon do projeto. Veja instruções em <strong>supabase/README.md</strong>.</p>
+    <button type="button" class="btn btn-primary" style="margin-top:1rem" onclick="location.reload()">Recarregar página</button>
   </div>
 </div>
 
@@ -1243,15 +1241,26 @@ function setupAuthUI() {
   });
 }
 
+function showConfigError(title, msg) {
+  document.getElementById('auth-config-title').innerHTML = title;
+  document.getElementById('auth-config-msg').innerHTML = msg;
+  showAuthEl('auth-config');
+}
+
 async function bootstrapAuth() {
   appStarted = false;
   document.getElementById('app-shell').classList.add('hidden');
 
-  sbClient = getSupabase();
-  if (!sbClient) {
-    showAuthEl('auth-config');
+  const cfg = window.VERDO_SUPABASE;
+  if (!cfg?.url || !cfg?.anonKey || cfg.url.includes('SEU_PROJETO') || cfg.anonKey.includes('SUA_CHAVE') || cfg.anonKey.includes('COLE_AQUI')) {
+    showConfigError('Configurar <em>Supabase</em>', 'Edite <strong>js/supabase-config.js</strong> com a URL e a chave anon do projeto.');
     return;
   }
+  if (!window.supabase?.createClient) {
+    showConfigError('Erro ao carregar <em>Supabase</em>', 'A biblioteca não carregou. Desative bloqueador de anúncios, verifique a internet e clique em Recarregar.');
+    return;
+  }
+  sbClient = window.supabase.createClient(cfg.url, cfg.anonKey);
   setupAuthUI();
 
   const { data: { session } } = await sbClient.auth.getSession();
@@ -1280,7 +1289,10 @@ async function bootstrapAuth() {
 //  INIT
 // ══════════════════════════════════════════════════
 
-bootstrapAuth();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-config.js?v=2"></script>
+<script src="js/auth.js?v=2"></script>
+<script>bootstrapAuth();</script>
 </body>
 </html>
