@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "."
+
+[build.environment]
+  SITE_URL = "https://siteflores-v2.netlify.app"
+  SUPABASE_URL = "https://vpxgbkxqwiktdqigrpmx.supabase.co"
+
+# Defina SUPABASE_ANON_KEY em: Netlify → Site settings → Environment variables

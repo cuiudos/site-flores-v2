@@ -561,6 +561,7 @@ function createSupabaseClient() {
   return fn(window.VERDO_SUPABASE.url, window.VERDO_SUPABASE.anonKey);
 }
 </script>
+<script src="js/store-api.js"></script>
 <script src="js/auth.js?v=3"></script>
 <!-- ══════════ JS ══════════ -->
 <script>
@@ -675,18 +676,22 @@ const defaultProducts = [
   }
 ];
 
-function loadProducts() {
+async function loadProducts() {
+  if (typeof fetchStoreCatalog === 'function') {
+    const cloud = await fetchStoreCatalog();
+    if (cloud?.length) return cloud;
+  }
   try {
     const saved = localStorage.getItem(STORE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed) && parsed.length) return parsed;
     }
-  } catch (e) { console.warn('Catálogo da loja:', e); }
+  } catch (e) { console.warn('Catálogo local:', e); }
   return defaultProducts;
 }
 
-let products = loadProducts();
+let products = [];
 
 // ── STATE ──
 let curFilter = 'Todas';
@@ -856,22 +861,15 @@ function pedirWpp() {
 }
 
 // Recarrega catálogo ao voltar da aba do admin (mesmo navegador)
-window.addEventListener('storage', e => {
+window.addEventListener('storage', async e => {
   if (e.key === STORE_KEY) {
-    products = loadProducts();
+    products = await loadProducts();
     const page = document.querySelector('.page.active');
     if (page?.id === 'page-home') renderHome();
     else if (page?.id === 'page-catalog') renderCatalog();
     else if (page?.id === 'page-product' && curProd) loadProduct(curProd.id);
   }
 });
-
-function refreshCatalog() {
-  products = loadProducts();
-  const page = document.querySelector('.page.active');
-  if (page?.id === 'page-home') renderHome();
-  else if (page?.id === 'page-catalog') renderCatalog();
-}
 
 async function updateAdminNavLink() {
   const link = document.getElementById('admin-nav-link');
@@ -889,9 +887,10 @@ window.addEventListener('popstate', () => {
   go(route.page, route.id, true);
 });
 
-function initApp() {
+async function initApp() {
+  products = await loadProducts();
   if (typeof injectFloristJsonLd === 'function') injectFloristJsonLd();
-  refreshCatalog();
+  renderHome();
   updateAdminNavLink();
   const route = typeof parseRoute === 'function' ? parseRoute() : { page: 'home' };
   if (route.page === 'product' && route.id) {

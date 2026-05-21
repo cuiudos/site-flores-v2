@@ -1,0 +1,7 @@
+{
+  "name": "site-flores-v2",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/generate-sitemap.mjs"
+  }
+}

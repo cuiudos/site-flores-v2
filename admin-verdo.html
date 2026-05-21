@@ -532,18 +532,21 @@ function migrateSchema() {
 
 const IMG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23E8F0E6' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%238BA888' font-family='sans-serif' font-size='20'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E";
 
-function syncStoreCatalog() {
-  const flowers = query('SELECT * FROM flowers WHERE stock > 0 ORDER BY name');
-  const catalog = flowers.map(f => {
+function buildCatalogPayload() {
+  const flowers = query('SELECT * FROM flowers ORDER BY id');
+  return flowers.map(f => {
     const sizes = query('SELECT * FROM sizes WHERE flower_id=? ORDER BY price', [f.id]);
     const imgs = query('SELECT data_url FROM flower_images WHERE flower_id=? ORDER BY sort_order', [f.id])
       .map(r => r.data_url);
+    const slug = (typeof slugify === 'function' ? slugify(f.name) : 'produto') + '-' + f.id;
     return {
       id: f.id,
+      slug,
       name: f.name,
       cat: f.category,
       badge: f.badge || '',
       desc: f.description || '',
+      stock: f.stock,
       imgs: imgs.length ? imgs : [IMG_PLACEHOLDER],
       sizes: sizes.map(s => ({
         k: s.key,
@@ -553,7 +556,20 @@ function syncStoreCatalog() {
       }))
     };
   });
+}
+
+function syncStoreCatalog() {
+  const catalog = buildCatalogPayload().filter(f => f.stock > 0);
   localStorage.setItem(STORE_KEY, JSON.stringify(catalog));
+}
+
+async function syncStoreToCloud() {
+  if (!sbClient) return;
+  const full = buildCatalogPayload();
+  if (typeof pushStoreCatalog !== 'function') return;
+  const r = await pushStoreCatalog(full);
+  if (r.ok) toast('Catálogo publicado na loja (SEO atualizado).');
+  else toast('Nuvem: ' + (r.error || 'falha ao publicar'), true);
 }
 
 function seedData() {
@@ -966,6 +982,7 @@ function saveFlower() {
   }
   saveFlowerImages(flowerId);
   syncStoreCatalog();
+  syncStoreToCloud();
   closeModalDirect();
   renderCatalogTable();
 }
@@ -978,6 +995,7 @@ function confirmDelete(id, name) {
     run('DELETE FROM sizes WHERE flower_id=?',[id]);
     run('DELETE FROM flowers WHERE id=?',[id]);
     syncStoreCatalog();
+    syncStoreToCloud();
     document.getElementById('confirm-bg').classList.add('hidden');
     renderCatalogTable();
     toast('Flor removida do catálogo e da loja.');
@@ -1121,6 +1139,7 @@ function registerSale() {
   // Decrease stock
   run('UPDATE flowers SET stock = MAX(0, stock-?) WHERE id=?',[qty, fid]);
   syncStoreCatalog();
+  syncStoreToCloud();
 
   toast(`Venda registrada! Total: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`);
   document.getElementById('reg-notes').value = '';
@@ -1305,6 +1324,8 @@ function createSupabaseClient() {
   return fn(window.VERDO_SUPABASE.url, window.VERDO_SUPABASE.anonKey);
 }
 </script>
+<script src="js/seo.js"></script>
+<script src="js/store-api.js"></script>
 <script src="js/auth.js?v=4"></script>
 <script>bootstrapAuth();</script>
 </body>

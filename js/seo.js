@@ -66,7 +66,8 @@
   };
 
   window.productPath = function (p) {
-    return '/produto/' + p.id + '-' + slugify(p.name);
+    const slug = p.slug || slugify(p.name);
+    return '/produto/' + p.id + '-' + slug;
   };
 
   window.injectFloristJsonLd = function () {
