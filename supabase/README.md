@@ -30,7 +30,15 @@ Copie `js/supabase-config.example.js` para `js/supabase-config.js` e preencha UR
 
 **Importante:** a senha só é criada no passo 3 do Supabase Auth. Não coloque senha em arquivos do projeto.
 
-## 5. Como funciona
+## 5. Storage de imagens (SEO)
+
+No **SQL Editor**, execute também:
+
+`migrations/003_storage_flower_images.sql`
+
+Isso cria o bucket público `flower-images`. Ao salvar uma flor no admin, as fotos sobem para a nuvem automaticamente.
+
+## 6. Como funciona
 
 | RPC | Quem chama | O que faz |
 |-----|------------|-----------|

@@ -404,11 +404,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
       <textarea id="m-desc" placeholder="Descrição do produto..."></textarea>
     </div>
     <div class="form-row">
-      <label>Fotos do produto (JPG, JPEG ou PNG · até 5)</label>
+      <label>Fotos do produto (JPG ou PNG · até 5 · salvas na nuvem)</label>
       <div class="img-upload-zone" id="img-drop-zone" onclick="document.getElementById('m-images').click()">
         <input type="file" id="m-images" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple>
         <strong>📷 Clique ou arraste as fotos aqui</strong>
-        <p>Máx. 5 imagens · 1,5 MB cada</p>
+        <p>Máx. 5 imagens · 1,5 MB cada · URLs públicas para SEO</p>
       </div>
       <div class="img-previews" id="img-previews"></div>
     </div>
@@ -950,7 +950,7 @@ function closeModalDirect() {
   document.getElementById('modal-bg').classList.add('hidden');
 }
 
-function saveFlower() {
+async function saveFlower() {
   const id = document.getElementById('modal-id').value;
   const name = document.getElementById('m-name').value.trim();
   const cat = document.getElementById('m-cat').value;
@@ -968,34 +968,47 @@ function saveFlower() {
   ].filter(s=>s.k && s.p);
 
   let flowerId;
-  if (id) {
-    run('UPDATE flowers SET name=?,category=?,description=?,badge=?,stock=? WHERE id=?',[name,cat,desc,badge,stock,id]);
-    run('DELETE FROM sizes WHERE flower_id=?',[id]);
-    sizes.forEach(s=>run('INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)',[id,s.k,s.l,s.p,s.c]));
-    flowerId = parseInt(id, 10);
-    toast('Flor atualizada e publicada na loja!');
-  } else {
-    run('INSERT INTO flowers(name,category,description,badge,stock) VALUES(?,?,?,?,?)',[name,cat,desc,badge,stock]);
-    flowerId = query('SELECT last_insert_rowid() as id')[0].id;
-    sizes.forEach(s=>run('INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)',[flowerId,s.k,s.l,s.p,s.c]));
-    toast('Flor adicionada e publicada na loja!');
+  try {
+    if (id) {
+      run('UPDATE flowers SET name=?,category=?,description=?,badge=?,stock=? WHERE id=?',[name,cat,desc,badge,stock,id]);
+      run('DELETE FROM sizes WHERE flower_id=?',[id]);
+      sizes.forEach(s=>run('INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)',[id,s.k,s.l,s.p,s.c]));
+      flowerId = parseInt(id, 10);
+    } else {
+      run('INSERT INTO flowers(name,category,description,badge,stock) VALUES(?,?,?,?,?)',[name,cat,desc,badge,stock]);
+      flowerId = query('SELECT last_insert_rowid() as id')[0].id;
+      sizes.forEach(s=>run('INSERT INTO sizes(flower_id,key,label,price,cost) VALUES(?,?,?,?,?)',[flowerId,s.k,s.l,s.p,s.c]));
+    }
+
+    if (sbClient && typeof uploadFlowerImages === 'function') {
+      toast('Enviando fotos para a nuvem...');
+      pendingImages = await uploadFlowerImages(sbClient, flowerId, pendingImages);
+    }
+
+    saveFlowerImages(flowerId);
+    syncStoreCatalog();
+    await syncStoreToCloud();
+    toast(id ? 'Flor atualizada e publicada na loja!' : 'Flor adicionada e publicada na loja!');
+    closeModalDirect();
+    renderCatalogTable();
+  } catch (err) {
+    console.error(err);
+    toast('Erro ao salvar: ' + (err.message || 'verifique Storage no Supabase'), true);
   }
-  saveFlowerImages(flowerId);
-  syncStoreCatalog();
-  syncStoreToCloud();
-  closeModalDirect();
-  renderCatalogTable();
 }
 
 function confirmDelete(id, name) {
   document.getElementById('confirm-text').textContent = `Deseja excluir "${name}"? Esta ação também removerá os tamanhos associados.`;
   document.getElementById('confirm-bg').classList.remove('hidden');
-  document.getElementById('confirm-ok').onclick = () => {
+  document.getElementById('confirm-ok').onclick = async () => {
+    if (sbClient && typeof deleteFlowerImagesFromStorage === 'function') {
+      await deleteFlowerImagesFromStorage(sbClient, id);
+    }
     run('DELETE FROM flower_images WHERE flower_id=?',[id]);
     run('DELETE FROM sizes WHERE flower_id=?',[id]);
     run('DELETE FROM flowers WHERE id=?',[id]);
     syncStoreCatalog();
-    syncStoreToCloud();
+    await syncStoreToCloud();
     document.getElementById('confirm-bg').classList.add('hidden');
     renderCatalogTable();
     toast('Flor removida do catálogo e da loja.');
@@ -1325,6 +1338,7 @@ function createSupabaseClient() {
 }
 </script>
 <script src="js/seo.js"></script>
+<script src="js/storage-upload.js"></script>
 <script src="js/store-api.js"></script>
 <script src="js/auth.js?v=4"></script>
 <script>bootstrapAuth();</script>

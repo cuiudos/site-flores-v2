@@ -61,11 +61,15 @@ Cada deploy roda `npm run build` e regenera `sitemap.xml` com todos os produtos.
 - Atualize `js/seo-config.js` → `siteUrl`
 - Atualize `netlify.toml` → `SITE_URL`
 
-### 6. Imagens profissionais (próxima fase)
+### 6. Imagens na nuvem (implementado)
 
-- Bucket **Supabase Storage** `flower-images` (público)
-- Admin faz upload → URL `https://....supabase.co/storage/...`
-- Google indexa imagens no Google Imagens
+Rode no SQL Editor: `supabase/migrations/003_storage_flower_images.sql`
+
+- Bucket **flower-images** (público)
+- Admin envia fotos ao salvar → URL `https://....supabase.co/storage/v1/object/public/flower-images/...`
+- Loja e Google usam URLs reais (melhor SEO e velocidade)
+
+**Republique** cada produto no admin (editar + salvar) para migrar fotos antigas em base64 para Storage.
 
 ### 7. Opcional avançado
 
