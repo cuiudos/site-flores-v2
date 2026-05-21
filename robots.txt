@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin-verdo.html
+
+Sitemap: https://siteflores-v2.netlify.app/sitemap.xml

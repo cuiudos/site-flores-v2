@@ -3,8 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verdô Flores | Flores & Arranjos Especiais</title>
+<title>Verdô Flores | Floricultura em Betim — Buquês e Arranjos</title>
+<meta name="description" content="Buquês, rosas e arranjos artesanais em Betim e região. Escolha o tamanho, peça pelo WhatsApp e receba flores frescas com entrega rápida.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Verdô Flores">
+<meta name="theme-color" content="#1E3A2F">
+<link rel="canonical" href="https://siteflores-v2.netlify.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Verdô Flores">
+<meta property="og:title" content="Verdô Flores | Floricultura em Betim">
+<meta property="og:description" content="Buquês e arranjos com entrega em Betim. Peça pelo WhatsApp.">
+<meta property="og:url" content="https://siteflores-v2.netlify.app/">
+<meta property="og:image" content="https://siteflores-v2.netlify.app/flores-frescas.jpg">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verdô Flores | Floricultura em Betim">
+<meta name="twitter:description" content="Buquês e arranjos com entrega em Betim. Peça pelo WhatsApp.">
+<meta name="twitter:image" content="https://siteflores-v2.netlify.app/flores-frescas.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="js/seo-config.js"></script>
+<script src="js/seo.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -334,8 +354,9 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
 <body>
 
 <!-- NAV -->
-<nav>
-  <a class="nav-logo" onclick="go('home')">Verdô <em>Flores</em></a>
+<header>
+<nav aria-label="Menu principal">
+  <a class="nav-logo" href="/" onclick="go('home');return false">Verdô <em>Flores</em></a>
   <div class="nav-links">
     <a onclick="go('home')">Início</a>
     <a onclick="go('catalog')">Catálogo</a>
@@ -346,9 +367,10 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
     <span></span><span></span><span></span>
   </div>
 </nav>
+</header>
 
 <!-- ══════════ HOME ══════════ -->
-<div id="page-home" class="page active">
+<main id="page-home" class="page active">
 
   <section class="hero">
     <div class="hero-content">
@@ -438,10 +460,10 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
     <p>Flores & Arranjos Especiais · Betim, MG</p>
     <p>Pedidos pelo WhatsApp: (31) 9 9999-9999</p>
   </footer>
-</div>
+</main>
 
 <!-- ══════════ CATALOG ══════════ -->
-<div id="page-catalog" class="page">
+<main id="page-catalog" class="page">
   <div class="cat-header">
     <h1>Catálogo <em>completo</em></h1>
     <p>Escolha o arranjo, selecione o tamanho e peça pelo WhatsApp com tudo pronto</p>
@@ -463,10 +485,10 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
     <p>Flores & Arranjos Especiais · Betim, MG</p>
     <p>Pedidos pelo WhatsApp: (31) 9 9999-9999</p>
   </footer>
-</div>
+</main>
 
 <!-- ══════════ PRODUCT DETAIL ══════════ -->
-<div id="page-product" class="page">
+<main id="page-product" class="page">
   <div class="detail-wrap">
     <div class="breadcrumb">
       <a onclick="go('home')">Início</a><span class="sep">›</span>
@@ -524,7 +546,7 @@ footer p{font-size:0.82rem;opacity:0.7;margin-top:0.25rem}
       </div>
     </div>
   </div>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
 <script>
@@ -672,20 +694,31 @@ let curProd = null;
 let selSize = 0;
 let qty = 1;
 
-// ── NAVIGATION ──
-function go(page, id) {
+// ── NAVIGATION + SEO (URLs compartilháveis) ──
+function go(page, id, skipHistory) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const seo = window.VERDO_SEO?.pages || {};
+
   if (page === 'home') {
     document.getElementById('page-home').classList.add('active');
     renderHome();
+    if (typeof setPageSEO === 'function') setPageSEO(seo.home || {});
+    if (typeof clearProductJsonLd === 'function') clearProductJsonLd();
+    if (!skipHistory) history.pushState({ page: 'home' }, '', '/');
   } else if (page === 'catalog') {
     document.getElementById('page-catalog').classList.add('active');
     renderCatalog();
+    if (typeof setPageSEO === 'function') setPageSEO(seo.catalog || {});
+    if (typeof clearProductJsonLd === 'function') clearProductJsonLd();
+    if (!skipHistory) history.pushState({ page: 'catalog' }, '', '/catalogo');
   } else if (page === 'product') {
     document.getElementById('page-product').classList.add('active');
     loadProduct(id);
+    if (!skipHistory && curProd && typeof productPath === 'function') {
+      history.pushState({ page: 'product', id }, '', productPath(curProd));
+    }
   }
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function filterGo(cat) {
@@ -753,7 +786,7 @@ function loadProduct(id) {
   document.getElementById('gal-main').alt = curProd.name;
   document.getElementById('gal-thumbs').innerHTML = curProd.imgs.map((img, i) =>
     `<div class="thumb ${i===0?'active':''}" onclick="setImg(this,${i})">
-      <img src="${img}" alt="">
+      <img src="${img}" alt="${curProd.name} - foto ${i + 1}" loading="lazy">
     </div>`
   ).join('');
 
@@ -767,6 +800,18 @@ function loadProduct(id) {
   ).join('');
 
   updTotal();
+
+  if (typeof setPageSEO === 'function') {
+    const price = curProd.sizes[0]?.price;
+    setPageSEO({
+      title: curProd.name + ' | Verdô Flores Betim',
+      description: (curProd.desc || '').slice(0, 155) + (price ? ' A partir de R$ ' + price + ',00.' : ''),
+      image: curProd.imgs[0],
+      path: productPath(curProd),
+      type: 'product'
+    });
+  }
+  if (typeof injectProductJsonLd === 'function') injectProductJsonLd(curProd);
 }
 
 function setImg(el, idx) {
@@ -839,9 +884,28 @@ async function updateAdminNavLink() {
   if (allowed) link.style.display = '';
 }
 
-// Init
-refreshCatalog();
-updateAdminNavLink();
+window.addEventListener('popstate', () => {
+  const route = typeof parseRoute === 'function' ? parseRoute() : { page: 'home' };
+  go(route.page, route.id, true);
+});
+
+function initApp() {
+  if (typeof injectFloristJsonLd === 'function') injectFloristJsonLd();
+  refreshCatalog();
+  updateAdminNavLink();
+  const route = typeof parseRoute === 'function' ? parseRoute() : { page: 'home' };
+  if (route.page === 'product' && route.id) {
+    const p = products.find(x => x.id === route.id);
+    if (p) go('product', route.id, true);
+    else go('home', null, true);
+  } else if (route.page === 'catalog') {
+    go('catalog', null, true);
+  } else {
+    go('home', null, true);
+  }
+}
+
+initApp();
 </script>
 </body>
 </html>
