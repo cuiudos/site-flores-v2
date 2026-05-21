@@ -1,7 +1,7 @@
 function getSupabase() {
   const cfg = window.VERDO_SUPABASE;
   if (!cfg?.url || !cfg?.anonKey) return null;
-  if (cfg.url.includes('SEU_PROJETO') || cfg.anonKey.includes('SUA_CHAVE')) return null;
+  if (cfg.url.includes('SEU_PROJETO') || cfg.anonKey.includes('SUA_CHAVE') || cfg.anonKey.includes('COLE_AQUI')) return null;
   if (!window.supabase?.createClient) return null;
   return window.supabase.createClient(cfg.url, cfg.anonKey);
 }

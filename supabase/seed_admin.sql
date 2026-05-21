@@ -3,7 +3,7 @@
 
 UPDATE public.admin_profiles
 SET can_access_admin = true
-WHERE lower(email) = lower('cuiudospro@gmail.com');
+WHERE lower(email) = lower('cuiudo@gmail.com');
 
 -- Conferir:
 -- SELECT id, email, can_access_admin FROM public.admin_profiles;

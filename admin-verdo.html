@@ -158,7 +158,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
 .empty p{font-size:0.9rem}
 
 /* AUTH */
-.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--green-dark)}
+.auth-screen{position:fixed;inset:0;z-index:1000;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--green-dark)}
 .auth-card{background:var(--white);border-radius:1.25rem;padding:2rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
 .auth-card h1{font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:400;color:var(--green-dark);margin-bottom:0.35rem}
 .auth-card h1 em{font-style:italic;color:var(--terra)}
@@ -1244,6 +1244,9 @@ function setupAuthUI() {
 }
 
 async function bootstrapAuth() {
+  appStarted = false;
+  document.getElementById('app-shell').classList.add('hidden');
+
   sbClient = getSupabase();
   if (!sbClient) {
     showAuthEl('auth-config');
@@ -1254,10 +1257,9 @@ async function bootstrapAuth() {
   const { data: { session } } = await sbClient.auth.getSession();
   if (session) {
     await handleSignedIn();
-    return;
+  } else {
+    showAuthEl('auth-login');
   }
-
-  showAuthEl('auth-login');
 
   sbClient.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_OUT') {
@@ -1268,7 +1270,7 @@ async function bootstrapAuth() {
       document.getElementById('login-password').value = '';
       clearAuthMsg();
       showAuthEl('auth-login');
-    } else if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+    } else if (event === 'SIGNED_IN' && session) {
       await handleSignedIn();
     }
   });
