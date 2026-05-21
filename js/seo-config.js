@@ -1,6 +1,6 @@
-// Ajuste siteUrl quando tiver domínio próprio (ex: https://verdoflores.com.br)
+// Ajuste siteUrl: URL da Vercel, Netlify ou domínio próprio
 window.VERDO_SEO = {
-  siteUrl: 'https://siteflores-v2.netlify.app',
+  siteUrl: typeof location !== 'undefined' ? location.origin : 'https://siteflores-v2.netlify.app',
   siteName: 'Verdô Flores',
   defaultTitle: 'Verdô Flores | Floricultura em Betim — Buquês e Arranjos',
   defaultDescription: 'Buquês, rosas e arranjos artesanais em Betim e região. Escolha o tamanho, peça pelo WhatsApp e receba flores frescas com entrega rápida.',

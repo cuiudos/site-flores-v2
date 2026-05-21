@@ -1,6 +1,9 @@
 import { writeFileSync } from 'fs';
 
-const SITE = process.env.SITE_URL || 'https://siteflores-v2.netlify.app';
+const SITE =
+  process.env.SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  'https://siteflores-v2.netlify.app';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vpxgbkxqwiktdqigrpmx.supabase.co';
 const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY || '';
 
