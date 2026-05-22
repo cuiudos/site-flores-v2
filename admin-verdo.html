@@ -55,7 +55,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
 .sect-sub{color:var(--text-light);font-size:0.85rem;margin-bottom:1.75rem}
 
 /* METRIC CARDS */
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+.report-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.report-box{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1.15rem 1.35rem}
+.report-box .rb-label{font-size:0.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.35rem}
+.report-box .rb-value{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;line-height:1.1}
+.report-box.gasto .rb-value{color:var(--red)}
+.report-box.ganho .rb-value{color:var(--green-mid)}
+.report-box.lucro .rb-value{color:var(--green-dark)}
+.report-highlight{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:0.88rem;color:var(--text-light);line-height:1.6}
+.report-highlight strong{color:var(--green-dark)}
+.report-tables{display:grid;grid-template-columns:1fr;gap:1.25rem}
+@media(min-width:1000px){.report-tables{grid-template-columns:1.35fr 1fr}}
 .metric{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1.25rem 1.5rem}
 .metric-label{font-size:0.72rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem}
 .metric-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--green-dark);line-height:1}
@@ -179,6 +190,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
 /* RESPONSIVE */
 @media(max-width:900px){
   .metrics{grid-template-columns:repeat(2,1fr)}
+  .report-summary{grid-template-columns:1fr}
   .charts-row{grid-template-columns:1fr}
 }
 @media(max-width:600px){
@@ -267,10 +279,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
   <p class="sect-sub">Visão geral das vendas, lucros e estoque da sua loja</p>
 
   <div class="metrics" id="metrics-row">
-    <div class="metric"><div class="metric-label">Total de Vendas</div><div class="metric-value" id="m-vendas">0</div><div class="metric-sub">pedidos registrados</div></div>
-    <div class="metric"><div class="metric-label">Receita Total</div><div class="metric-value" id="m-receita">R$ 0</div><div class="metric-sub">faturamento bruto</div></div>
-    <div class="metric"><div class="metric-label">Lucro Estimado</div><div class="metric-value" id="m-lucro">R$ 0</div><div class="metric-sub">margem de 40%</div></div>
-    <div class="metric" id="m-sem-stock-card"><div class="metric-label">Flores sem Estoque</div><div class="metric-value" id="m-semstock">0</div><div class="metric-sub">precisam de reposição</div></div>
+    <div class="metric"><div class="metric-label">Unidades vendidas</div><div class="metric-value" id="m-unidades">0</div><div class="metric-sub">total de itens</div></div>
+    <div class="metric"><div class="metric-label">Flores vendidas</div><div class="metric-value" id="m-flores-vendidas">0</div><div class="metric-sub">tipos diferentes</div></div>
+    <div class="metric"><div class="metric-label">Pedidos</div><div class="metric-value" id="m-pedidos">0</div><div class="metric-sub">linhas de venda</div></div>
+    <div class="metric" id="m-sem-stock-card"><div class="metric-label">Sem estoque</div><div class="metric-value" id="m-semstock">0</div><div class="metric-sub">precisam reposição</div></div>
+  </div>
+
+  <div class="report-summary">
+    <div class="report-box gasto">
+      <div class="rb-label">Gasto (custo)</div>
+      <div class="rb-value" id="m-gasto">R$ 0</div>
+    </div>
+    <div class="report-box ganho">
+      <div class="rb-label">Ganho (receita)</div>
+      <div class="rb-value" id="m-ganho">R$ 0</div>
+    </div>
+    <div class="report-box lucro">
+      <div class="rb-label">Lucro</div>
+      <div class="rb-value" id="m-lucro">R$ 0</div>
+    </div>
+  </div>
+
+  <div class="report-highlight" id="report-highlight">
+    Carregando relatório...
   </div>
 
   <div class="charts-row">
@@ -284,12 +315,26 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
     </div>
   </div>
 
-  <div class="chart-card">
-    <div class="chart-title">Ranking de Flores</div>
-    <table class="top-table" id="top-table">
-      <thead><tr><th>#</th><th>Flor</th><th>Categoria</th><th>Unidades vendidas</th><th>Receita</th></tr></thead>
-      <tbody id="top-tbody"></tbody>
-    </table>
+  <div class="report-tables">
+    <div class="chart-card">
+      <div class="chart-title">Relatório por flor</div>
+      <table class="top-table" id="top-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Flor</th><th>Unid.</th><th>Gasto</th><th>Ganho</th><th>Lucro</th>
+            <th>Tamanho + vendido</th>
+          </tr>
+        </thead>
+        <tbody id="report-flowers-tbody"></tbody>
+      </table>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Vendas por tamanho</div>
+      <table class="top-table">
+        <thead><tr><th>Tamanho</th><th>Unid.</th><th>Receita</th><th>% do total</th></tr></thead>
+        <tbody id="report-sizes-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -326,7 +371,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
     <select id="filter-month" onchange="renderSalesTable()">
       <option value="">Todos os meses</option>
     </select>
-    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportSalesPDF()">⬇ Exportar PDF</button>
   </div>
 
   <div class="sales-table-wrap">
@@ -663,20 +708,94 @@ function showPage(name) {
 let monthlyChart = null;
 let topChart = null;
 
+function moneyBR(n, decimals = 0) {
+  return 'R$ ' + Number(n).toLocaleString('pt-BR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+function buildSalesReport(sales) {
+  const totalUnits = sales.reduce((a, s) => a + s.qty, 0);
+  const totalReceita = sales.reduce((a, s) => a + s.total, 0);
+  const totalGasto = sales.reduce((a, s) => a + s.qty * s.unit_cost, 0);
+  const totalLucro = sales.reduce((a, s) => a + s.profit, 0);
+
+  const byFlower = {};
+  const bySizeGlobal = {};
+
+  sales.forEach(s => {
+    if (!byFlower[s.flower_name]) {
+      byFlower[s.flower_name] = { qty: 0, gasto: 0, ganho: 0, lucro: 0, sizes: {} };
+    }
+    const f = byFlower[s.flower_name];
+    f.qty += s.qty;
+    f.gasto += s.qty * s.unit_cost;
+    f.ganho += s.total;
+    f.lucro += s.profit;
+
+    const sizeId = s.size_key + '|' + s.size_label;
+    if (!f.sizes[sizeId]) f.sizes[sizeId] = { key: s.size_key, label: s.size_label, qty: 0 };
+    f.sizes[sizeId].qty += s.qty;
+
+    const sizeName = s.size_label + ' (' + s.size_key + ')';
+    if (!bySizeGlobal[sizeName]) bySizeGlobal[sizeName] = { label: sizeName, qty: 0, receita: 0 };
+    bySizeGlobal[sizeName].qty += s.qty;
+    bySizeGlobal[sizeName].receita += s.total;
+  });
+
+  const flowersReport = Object.entries(byFlower).map(([name, f]) => {
+    const topSize = Object.values(f.sizes).sort((a, b) => b.qty - a.qty)[0] || null;
+    return { name, qty: f.qty, gasto: f.gasto, ganho: f.ganho, lucro: f.lucro, topSize };
+  }).sort((a, b) => b.qty - a.qty);
+
+  const sizesReport = Object.values(bySizeGlobal).sort((a, b) => b.qty - a.qty);
+  const topSizeOverall = sizesReport[0] || null;
+
+  return {
+    totalUnits,
+    totalReceita,
+    totalGasto,
+    totalLucro,
+    pedidos: sales.length,
+    flowersCount: flowersReport.length,
+    flowersReport,
+    sizesReport,
+    topSizeOverall
+  };
+}
+
 function renderDashboard() {
   const sales = query('SELECT * FROM sales');
   const flowers = query('SELECT * FROM flowers');
+  const report = buildSalesReport(sales);
   const zeroStock = flowers.filter(f => f.stock === 0);
   const lowStock = flowers.filter(f => f.stock > 0 && f.stock <= 3);
+  const flowerMap = Object.fromEntries(flowers.map(f => [f.name, f.category]));
+  const margem = report.totalReceita > 0
+    ? Math.round((report.totalLucro / report.totalReceita) * 100)
+    : 0;
 
-  const totalVendas = sales.reduce((a,s) => a + s.qty, 0);
-  const totalReceita = sales.reduce((a,s) => a + s.total, 0);
-  const totalLucro = sales.reduce((a,s) => a + s.profit, 0);
-
-  document.getElementById('m-vendas').textContent = totalVendas;
-  document.getElementById('m-receita').textContent = 'R$ ' + totalReceita.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-  document.getElementById('m-lucro').textContent = 'R$ ' + totalLucro.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('m-unidades').textContent = report.totalUnits;
+  document.getElementById('m-flores-vendidas').textContent = report.flowersCount;
+  document.getElementById('m-pedidos').textContent = report.pedidos;
+  document.getElementById('m-gasto').textContent = moneyBR(report.totalGasto);
+  document.getElementById('m-ganho').textContent = moneyBR(report.totalReceita);
+  document.getElementById('m-lucro').textContent = moneyBR(report.totalLucro);
   document.getElementById('m-semstock').textContent = zeroStock.length;
+
+  const highlight = document.getElementById('report-highlight');
+  if (!sales.length) {
+    highlight.innerHTML = '<strong>Nenhuma venda registrada ainda.</strong> O relatório aparecerá quando você registrar vendas em <em>Registrar Venda</em>.';
+  } else {
+    const topSizeTxt = report.topSizeOverall
+      ? `<strong>${report.topSizeOverall.label}</strong> (${report.topSizeOverall.qty} unid.)`
+      : '—';
+    highlight.innerHTML =
+      `Você vendeu <strong>${report.totalUnits} unidades</strong> de <strong>${report.flowersCount} flores</strong> diferentes. ` +
+      `Tamanho mais vendido no geral: ${topSizeTxt}. ` +
+      `Margem de lucro sobre a receita: <strong>${margem}%</strong> (lucro ${moneyBR(report.totalLucro)}).`;
+  }
 
   const stockCard = document.getElementById('m-sem-stock-card');
   stockCard.classList.toggle('alert-metric', zeroStock.length > 0);
@@ -722,42 +841,57 @@ function renderDashboard() {
               x:{grid:{display:false}}}}
   });
 
-  // Top flowers
-  const byFlower = {};
-  sales.forEach(s => {
-    if (!byFlower[s.flower_name]) byFlower[s.flower_name] = {qty:0,total:0};
-    byFlower[s.flower_name].qty += s.qty;
-    byFlower[s.flower_name].total += s.total;
-  });
-  const topFlowers = Object.entries(byFlower).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
+  const topFlowers = report.flowersReport.slice(0, 5);
 
   if (topChart) topChart.destroy();
-  const topColors = ['#C4714A','#2D5A3D','#8BA888','#1E3A2F','#E8956D'];
+  const topColors = ['#C4714A', '#2D5A3D', '#8BA888', '#1E3A2F', '#E8956D'];
   topChart = new Chart(document.getElementById('chart-top'), {
-    type:'doughnut',
-    data:{
-      labels:topFlowers.map(([n])=>n.length>18?n.slice(0,17)+'…':n),
-      datasets:[{data:topFlowers.map(([,v])=>v.qty),backgroundColor:topColors,borderWidth:2,borderColor:'#FDF6EE'}]
+    type: 'doughnut',
+    data: {
+      labels: topFlowers.map(f => f.name.length > 18 ? f.name.slice(0, 17) + '…' : f.name),
+      datasets: [{ data: topFlowers.map(f => f.qty), backgroundColor: topColors, borderWidth: 2, borderColor: '#FDF6EE' }]
     },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:10}}}}
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 10 } } }
+    }
   });
 
-  // Top table
-  const tbody = document.getElementById('top-tbody');
-  const maxQty = topFlowers[0]?.[1]?.qty || 1;
-  const flowerMap = Object.fromEntries(flowers.map(f=>[f.name,f.category]));
-  tbody.innerHTML = topFlowers.map(([name,v],i)=>`
-    <tr>
-      <td><span class="top-rank">${i+1}</span></td>
-      <td><div class="flower-name">${name}</div><div class="flower-cat">${flowerMap[name]||''}</div></td>
-      <td style="color:var(--text-light)">${flowerMap[name]||''}</td>
+  const flowersTbody = document.getElementById('report-flowers-tbody');
+  const maxQty = report.flowersReport[0]?.qty || 1;
+  flowersTbody.innerHTML = report.flowersReport.map((f, i) => {
+    const topSize = f.topSize
+      ? `${f.topSize.label} (${f.topSize.key}) — ${f.topSize.qty} un.`
+      : '—';
+    return `<tr>
+      <td><span class="top-rank">${i + 1}</span></td>
       <td>
-        <div>${v.qty} unid.</div>
-        <div class="top-bar"><div class="top-bar-fill" style="width:${Math.round(v.qty/maxQty*100)}%"></div></div>
+        <div class="flower-name">${f.name}</div>
+        <div class="flower-cat">${flowerMap[f.name] || ''}</div>
       </td>
-      <td style="font-weight:600;color:var(--green-dark)">R$ ${v.total.toLocaleString('pt-BR',{minimumFractionDigits:0})}</td>
-    </tr>
-  `).join('') || '<tr><td colspan="5" class="empty"><p>Nenhuma venda registrada ainda.</p></td></tr>';
+      <td>
+        <div style="font-weight:600">${f.qty} un.</div>
+        <div class="top-bar"><div class="top-bar-fill" style="width:${Math.round(f.qty / maxQty * 100)}%"></div></div>
+      </td>
+      <td style="color:var(--red)">${moneyBR(f.gasto)}</td>
+      <td style="font-weight:600;color:var(--green-mid)">${moneyBR(f.ganho)}</td>
+      <td class="sale-profit">${moneyBR(f.lucro)}</td>
+      <td style="font-size:0.82rem">${topSize}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7"><div class="empty"><p>Nenhuma venda registrada ainda.</p></div></td></tr>';
+
+  const sizesTbody = document.getElementById('report-sizes-tbody');
+  sizesTbody.innerHTML = report.sizesReport.map(s => {
+    const pct = report.totalUnits > 0 ? Math.round((s.qty / report.totalUnits) * 100) : 0;
+    const isTop = report.topSizeOverall && s.label === report.topSizeOverall.label;
+    return `<tr${isTop ? ' style="background:var(--green-pale)"' : ''}>
+      <td><strong>${s.label}</strong>${isTop ? ' <span style="font-size:0.68rem;color:var(--terra);font-weight:700">★ TOP</span>' : ''}</td>
+      <td style="font-weight:600">${s.qty} un.</td>
+      <td>${moneyBR(s.receita)}</td>
+      <td>${pct}%</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4"><div class="empty"><p>Sem dados de tamanho.</p></div></td></tr>';
 }
 
 // ══════════════════════════════════════════════════
@@ -1035,17 +1169,19 @@ function populateSalesFilters() {
     }).join('');
 }
 
-function renderSalesTable() {
+function getFilteredSales() {
   const flower = document.getElementById('filter-flower').value;
   const month = document.getElementById('filter-month').value;
-
   let sql = 'SELECT * FROM sales WHERE 1=1';
   const params = [];
   if (flower) { sql += ' AND flower_name=?'; params.push(flower); }
   if (month) { sql += ' AND substr(sale_date,1,7)=?'; params.push(month); }
   sql += ' ORDER BY sale_date DESC, id DESC';
+  return query(sql, params);
+}
 
-  const sales = query(sql, params);
+function renderSalesTable() {
+  const sales = getFilteredSales();
   const tbody = document.getElementById('sales-tbody');
 
   if (!sales.length) {
@@ -1074,15 +1210,80 @@ function deleteSale(id) {
   toast('Venda removida.');
 }
 
-function exportCSV() {
-  const sales = query('SELECT * FROM sales ORDER BY sale_date DESC');
-  const header = 'Data,Flor,Tamanho,Qtd,Preço Unit.,Total,Lucro Est.,Notas';
-  const rows = sales.map(s=>[s.sale_date,`"${s.flower_name}"`,s.size_label,s.qty,s.unit_price,s.total,s.profit,`"${s.notes||''}"`].join(','));
-  const csv = [header,...rows].join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download = 'vendas-verdo-'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click();
+function formatMoneyBR(n) {
+  return 'R$ ' + Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function exportSalesPDF() {
+  if (!window.jspdf?.jsPDF) {
+    toast('Biblioteca PDF não carregou. Recarregue a página.', true);
+    return;
+  }
+
+  const sales = getFilteredSales();
+  if (!sales.length) {
+    toast('Nenhuma venda para exportar com os filtros atuais.', true);
+    return;
+  }
+
+  const flowerSel = document.getElementById('filter-flower');
+  const monthSel = document.getElementById('filter-month');
+  const flowerLabel = flowerSel.value || 'Todas as flores';
+  const monthLabel = monthSel.options[monthSel.selectedIndex]?.text || 'Todos os meses';
+
+  const sumQty = sales.reduce((a, s) => a + s.qty, 0);
+  const sumTotal = sales.reduce((a, s) => a + s.total, 0);
+  const sumProfit = sales.reduce((a, s) => a + s.profit, 0);
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(30, 58, 47);
+  doc.text('Verdô Flores — Histórico de Vendas', 14, 16);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
+  doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 23);
+  doc.text('Filtro flor: ' + flowerLabel, 14, 28);
+  doc.text('Filtro período: ' + monthLabel, 14, 33);
+  doc.text('Total de registros: ' + sales.length, 14, 38);
+
+  const body = sales.map(s => [
+    new Date(s.sale_date + 'T00:00:00').toLocaleDateString('pt-BR'),
+    s.flower_name,
+    s.size_label + ' (' + s.size_key + ')',
+    String(s.qty),
+    formatMoneyBR(s.unit_price),
+    formatMoneyBR(s.total),
+    formatMoneyBR(s.profit),
+    s.notes || '—'
+  ]);
+
+  doc.autoTable({
+    startY: 44,
+    head: [['Data', 'Flor', 'Tamanho', 'Qtd', 'Preço unit.', 'Total', 'Lucro est.', 'Notas']],
+    body,
+    foot: [[
+      '', '', 'Totais', String(sumQty), '', formatMoneyBR(sumTotal), formatMoneyBR(sumProfit), ''
+    ]],
+    styles: { fontSize: 8, cellPadding: 2.5, overflow: 'linebreak' },
+    headStyles: { fillColor: [30, 58, 47], textColor: 255, fontStyle: 'bold' },
+    footStyles: { fillColor: [232, 240, 230], textColor: [30, 58, 47], fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [253, 246, 238] },
+    columnStyles: {
+      0: { cellWidth: 22 },
+      1: { cellWidth: 48 },
+      7: { cellWidth: 32 }
+    },
+    margin: { left: 14, right: 14 }
+  });
+
+  const fileDate = new Date().toISOString().slice(0, 10);
+  doc.save('vendas-verdo-' + fileDate + '.pdf');
+  toast('PDF exportado com sucesso!');
 }
 
 // ══════════════════════════════════════════════════
@@ -1324,6 +1525,8 @@ async function bootstrapAuth() {
 // ══════════════════════════════════════════════════
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
 <script>
 window.VERDO_SUPABASE = window.VERDO_SUPABASE || {
