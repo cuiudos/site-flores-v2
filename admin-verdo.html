@@ -280,6 +280,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--green-dark)
   <div class="sect-title">Dashboard <em>Verdô</em></div>
   <p class="sect-sub">Visão geral das vendas, lucros e estoque da sua loja</p>
 
+  <div class="sales-toolbar" style="margin-bottom:1.25rem">
+    <button class="btn btn-secondary btn-sm" onclick="exportDashboardPDF()">⬇ Exportar relatório PDF</button>
+  </div>
+
   <div class="metrics" id="metrics-row">
     <div class="metric"><div class="metric-label">Unidades vendidas</div><div class="metric-value" id="m-unidades">0</div><div class="metric-sub">total de itens</div></div>
     <div class="metric"><div class="metric-label">Flores vendidas</div><div class="metric-value" id="m-flores-vendidas">0</div><div class="metric-sub">tipos diferentes</div></div>
@@ -1222,12 +1226,162 @@ function getJsPDFLib() {
   return null;
 }
 
-function exportSalesPDF() {
+const PDF_TABLE_STYLE = {
+  styles: { fontSize: 8, cellPadding: 2.5, overflow: 'linebreak' },
+  headStyles: { fillColor: [30, 58, 47], textColor: 255, fontStyle: 'bold' },
+  footStyles: { fillColor: [232, 240, 230], textColor: [30, 58, 47], fontStyle: 'bold' },
+  alternateRowStyles: { fillColor: [253, 246, 238] },
+  margin: { left: 14, right: 14 }
+};
+
+function createPdfDocument(title) {
   const JsPDF = getJsPDFLib();
   if (!JsPDF) {
     toast('Biblioteca PDF não carregou. Recarregue a página (Ctrl+F5).', true);
+    return null;
+  }
+  const doc = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  if (typeof doc.autoTable !== 'function') {
+    toast('Plugin de tabela PDF não carregou. Recarregue a página (Ctrl+F5).', true);
+    return null;
+  }
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(30, 58, 47);
+  doc.text(title, 14, 16);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
+  doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 23);
+  return doc;
+}
+
+function pdfSectionTitle(doc, text, y) {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(30, 58, 47);
+  doc.text(text, 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
+}
+
+function exportDashboardPDF() {
+  const doc = createPdfDocument('Verdô Flores — Relatório do Dashboard');
+  if (!doc) return;
+
+  const sales = query('SELECT * FROM sales');
+  if (!sales.length) {
+    toast('Nenhuma venda para exportar no relatório.', true);
     return;
   }
+
+  const flowers = query('SELECT * FROM flowers');
+  const report = buildSalesReport(sales);
+  const zeroStock = flowers.filter(f => f.stock === 0);
+  const lowStock = flowers.filter(f => f.stock > 0 && f.stock <= 3);
+  const margem = report.totalReceita > 0
+    ? Math.round((report.totalLucro / report.totalReceita) * 100)
+    : 0;
+  const topSizeTxt = report.topSizeOverall
+    ? report.topSizeOverall.label + ' (' + report.topSizeOverall.qty + ' un.)'
+    : '—';
+
+  doc.text(
+    'Unidades: ' + report.totalUnits + '  |  Flores vendidas: ' + report.flowersCount +
+    '  |  Pedidos: ' + report.pedidos + '  |  Sem estoque: ' + zeroStock.length,
+    14, 28
+  );
+  doc.text(
+    'Gasto: ' + formatMoneyBR(report.totalGasto) + '  |  Ganho: ' + formatMoneyBR(report.totalReceita) +
+    '  |  Lucro: ' + formatMoneyBR(report.totalLucro) + '  |  Margem: ' + margem + '%',
+    14, 33
+  );
+  doc.text('Tamanho mais vendido: ' + topSizeTxt, 14, 38);
+  if (zeroStock.length) {
+    doc.text('Sem estoque: ' + zeroStock.map(f => f.name).join(', '), 14, 43);
+  }
+  if (lowStock.length) {
+    doc.text(
+      'Estoque baixo: ' + lowStock.map(f => f.name + ' (' + f.stock + ' un.)').join(', '),
+      14,
+      zeroStock.length ? 48 : 43
+    );
+  }
+
+  const startTablesY = zeroStock.length && lowStock.length ? 54 : (zeroStock.length || lowStock.length ? 49 : 44);
+
+  const flowerBody = report.flowersReport.map((f, i) => [
+    String(i + 1),
+    f.name,
+    String(f.qty),
+    formatMoneyBR(f.gasto),
+    formatMoneyBR(f.ganho),
+    formatMoneyBR(f.lucro),
+    f.topSize ? f.topSize.label + ' (' + f.topSize.key + ') — ' + f.topSize.qty + ' un.' : '—'
+  ]);
+
+  pdfSectionTitle(doc, 'Relatório por flor', startTablesY);
+  doc.autoTable({
+    startY: startTablesY + 4,
+    head: [['#', 'Flor', 'Unid.', 'Gasto', 'Ganho', 'Lucro', 'Tamanho + vendido']],
+    body: flowerBody,
+    foot: [[
+      '', 'Totais', String(report.totalUnits),
+      formatMoneyBR(report.totalGasto), formatMoneyBR(report.totalReceita),
+      formatMoneyBR(report.totalLucro), ''
+    ]],
+    ...PDF_TABLE_STYLE,
+    columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 52 } }
+  });
+
+  const afterFlowers = doc.lastAutoTable.finalY + 10;
+  const sizeBody = report.sizesReport.map(s => {
+    const pct = report.totalUnits > 0 ? Math.round((s.qty / report.totalUnits) * 100) : 0;
+    return [s.label, String(s.qty), formatMoneyBR(s.receita), pct + '%'];
+  });
+
+  pdfSectionTitle(doc, 'Vendas por tamanho', afterFlowers);
+  doc.autoTable({
+    startY: afterFlowers + 4,
+    head: [['Tamanho', 'Unid.', 'Receita', '% do total']],
+    body: sizeBody,
+    ...PDF_TABLE_STYLE,
+    columnStyles: { 0: { cellWidth: 55 } }
+  });
+
+  const byMonth = {};
+  sales.forEach(s => {
+    const m = s.sale_date.slice(0, 7);
+    byMonth[m] = (byMonth[m] || 0) + s.total;
+  });
+  const months = Object.keys(byMonth).sort();
+  if (months.length) {
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const afterSizes = doc.lastAutoTable.finalY + 10;
+    const monthBody = months.map(m => {
+      const [y, mo] = m.split('-');
+      return [monthNames[+mo - 1] + '/' + y.slice(2), formatMoneyBR(byMonth[m])];
+    });
+    pdfSectionTitle(doc, 'Receita por mês', afterSizes);
+    doc.autoTable({
+      startY: afterSizes + 4,
+      head: [['Mês', 'Receita']],
+      body: monthBody,
+      foot: [['Total', formatMoneyBR(report.totalReceita)]],
+      ...PDF_TABLE_STYLE,
+      columnStyles: { 0: { cellWidth: 40 } }
+    });
+  }
+
+  const fileDate = new Date().toISOString().slice(0, 10);
+  doc.save('dashboard-verdo-' + fileDate + '.pdf');
+  toast('Relatório do dashboard exportado em PDF!');
+}
+
+function exportSalesPDF() {
+  const doc = createPdfDocument('Verdô Flores — Histórico de Vendas');
+  if (!doc) return;
 
   const sales = getFilteredSales();
   if (!sales.length) {
@@ -1244,21 +1398,6 @@ function exportSalesPDF() {
   const sumTotal = sales.reduce((a, s) => a + s.total, 0);
   const sumProfit = sales.reduce((a, s) => a + s.profit, 0);
 
-  const doc = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  if (typeof doc.autoTable !== 'function') {
-    toast('Plugin de tabela PDF não carregou. Recarregue a página (Ctrl+F5).', true);
-    return;
-  }
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.setTextColor(30, 58, 47);
-  doc.text('Verdô Flores — Histórico de Vendas', 14, 16);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(80, 80, 80);
-  doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 23);
   doc.text('Filtro flor: ' + flowerLabel, 14, 28);
   doc.text('Filtro período: ' + monthLabel, 14, 33);
   doc.text('Total de registros: ' + sales.length, 14, 38);
@@ -1281,16 +1420,12 @@ function exportSalesPDF() {
     foot: [[
       '', '', 'Totais', String(sumQty), '', formatMoneyBR(sumTotal), formatMoneyBR(sumProfit), ''
     ]],
-    styles: { fontSize: 8, cellPadding: 2.5, overflow: 'linebreak' },
-    headStyles: { fillColor: [30, 58, 47], textColor: 255, fontStyle: 'bold' },
-    footStyles: { fillColor: [232, 240, 230], textColor: [30, 58, 47], fontStyle: 'bold' },
-    alternateRowStyles: { fillColor: [253, 246, 238] },
+    ...PDF_TABLE_STYLE,
     columnStyles: {
       0: { cellWidth: 22 },
       1: { cellWidth: 48 },
       7: { cellWidth: 32 }
-    },
-    margin: { left: 14, right: 14 }
+    }
   });
 
   const fileDate = new Date().toISOString().slice(0, 10);
