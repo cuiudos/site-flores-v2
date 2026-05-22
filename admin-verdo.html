@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 .hidden{display:none!important}
@@ -1214,9 +1216,16 @@ function formatMoneyBR(n) {
   return 'R$ ' + Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function getJsPDFLib() {
+  if (window.jspdf?.jsPDF) return window.jspdf.jsPDF;
+  if (typeof window.jsPDF === 'function') return window.jsPDF;
+  return null;
+}
+
 function exportSalesPDF() {
-  if (!window.jspdf?.jsPDF) {
-    toast('Biblioteca PDF não carregou. Recarregue a página.', true);
+  const JsPDF = getJsPDFLib();
+  if (!JsPDF) {
+    toast('Biblioteca PDF não carregou. Recarregue a página (Ctrl+F5).', true);
     return;
   }
 
@@ -1235,8 +1244,11 @@ function exportSalesPDF() {
   const sumTotal = sales.reduce((a, s) => a + s.total, 0);
   const sumProfit = sales.reduce((a, s) => a + s.profit, 0);
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const doc = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  if (typeof doc.autoTable !== 'function') {
+    toast('Plugin de tabela PDF não carregou. Recarregue a página (Ctrl+F5).', true);
+    return;
+  }
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
@@ -1525,8 +1537,6 @@ async function bootstrapAuth() {
 // ══════════════════════════════════════════════════
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
 <script>
 window.VERDO_SUPABASE = window.VERDO_SUPABASE || {
